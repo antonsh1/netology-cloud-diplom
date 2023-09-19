@@ -13,6 +13,7 @@
     "core-js": "^3.28.0",
     "html-loader": "4.2.0",
     "moment": "^2.29.4",
+    "vite": "^4.4.9",
     "vue": "^3.2.47",
     "vue-class-component": "^8.0.0-0",
     "vue-router": "^4.1.6",

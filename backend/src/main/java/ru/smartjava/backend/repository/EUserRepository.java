@@ -10,5 +10,7 @@ import java.util.Optional;
 public interface EUserRepository extends JpaRepository<EUser, Long> {
 
     Optional<EUser> findByLogin(String login);
+    Optional<EUser> findByToken(String token);
+
     Boolean existsByLogin(String login);
 }

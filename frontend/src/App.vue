@@ -1,47 +1,38 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+    <navbar />
+    <router-view />
+    <notifications />
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-}
+<script>
+    import {defineComponent} from 'vue';
+    import Navbar from '@/components/Navbar.vue';
+    import Notifications from "@/components/Notifications";
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
+    export default defineComponent({
+        name: 'App',
+        components: {
+            Notifications,
+            Navbar,
+        },
+    });
+</script>
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+<style lang="scss">
+    * {
+        margin: 0;
+        padding: 0;
+        font-family: inherit;
+    }
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
+    #app {
+        font-family: 'Roboto', sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
 
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
+        main {
+            flex-grow: 1;
+        }
+    }
 </style>

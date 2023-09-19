@@ -3,28 +3,43 @@ package ru.smartjava.backend.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.access.channel.ChannelProcessingFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import javax.sql.DataSource;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @RequiredArgsConstructor
 @EnableMethodSecurity(securedEnabled = true, prePostEnabled = true, jsr250Enabled = true)
-public class WebSecurityConfig {
+public class WebSecurityConfig  {
+
+    private final UserDetailsService userDetailsService;
+
+    private final AuthenticationManagerBuilder authManagerBuilder;
+
+    private final CustomAuthenticationSuccessHandler customSuccessHandler;
+
+    private final CustomAuthenticationFailureHandler customFailureHandler;
+
+    private final CorsFilter corsFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -34,29 +49,35 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests((authorize) ->
-                        authorize.anyRequest().authenticated()
-                ).formLogin(withDefaults())
+        CustomFilter mupaf = new CustomFilter();
+        mupaf.setAuthenticationSuccessHandler(customSuccessHandler);
+        mupaf.setAuthenticationFailureHandler(customFailureHandler);
+        mupaf.setAuthenticationManager(authManagerBuilder.getOrBuild());
+        http
+                .cors(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
+                .addFilterBefore(corsFilter, ChannelProcessingFilter.class)
+                .addFilterAt(mupaf, UsernamePasswordAuthenticationFilter.class)
+                .authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())
+//                .authorizeHttpRequests((requests) -> requests
+//                        .requestMatchers("/test/check").authenticated()
+//                        .requestMatchers("/login").permitAll()
+//                        .anyRequest().authenticated())
+//                .formLogin(withDefaults())
                 .logout(LogoutConfigurer::permitAll);
         return http.build();
     }
 
 //    @Bean
-//    public InMemoryUserDetailsManager userDetailsService() {
-//        UserDetails user1 = User.withUsername("user1")
-//                .password(passwordEncoder().encode("password"))
-//                .roles("CITY","READ")
-//                .build();
-//        UserDetails user2 = User.withUsername("user2")
-//                .password(passwordEncoder().encode("password"))
-//                .roles("AGE","WRITE")
-//                .build();
-//        UserDetails admin = User.withUsername("admin")
-//                .password(passwordEncoder().encode("password"))
-//                .roles("ALL","DELETE")
-//                .build();
-//        return new InMemoryUserDetailsManager(user1, user2, admin);
+//    CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.setAllowedOrigins(List.of("http://localhost:8080"));
+//        configuration.setAllowedMethods(Arrays.asList("GET","POST"));
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
 //    }
+
 
 //    @Bean
 //    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

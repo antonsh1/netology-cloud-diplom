@@ -4,6 +4,7 @@ services:
     image: postgres:latest
     ports:
       - 5432:5432
+    container_name: postgres-image
     volumes:
       - ./backend/src/main/resources/sql/init.sql:/docker-entrypoint-initdb.d/1-init.sql
 
@@ -11,3 +12,11 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_DB=postgres
       - POSTGRES_PASSWORD=postgres
+#  nodejs:
+#    image: node:latest
+#    ports:
+#      - 8080:8080
+#    container_name: nodejs-image
+#    volumes:
+#      - ./frontend/:/usr/src/app/my-app
+#      - /usr/src/app/my-app/node_modules
