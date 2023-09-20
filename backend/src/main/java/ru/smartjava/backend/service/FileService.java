@@ -1,11 +1,18 @@
 package ru.smartjava.backend.service;
 
-import ru.smartjava.backend.entity.FileItem;
+import org.springframework.core.io.Resource;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.io.File;
 
 public interface FileService {
 
-    List<FileItem> getFileList(Integer numberFiles);
+    String getFileList(Integer numberFiles);
+    void deleteFile(String fileName);
+    File getFile(String fileName);
+
+    Resource loadAsResource(String fileName);
+
+    void storeFile(MultipartFile file);
 
 }

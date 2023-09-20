@@ -36,4 +36,5 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         out.print(gson.toJson(tokenMessage));
         out.flush();
     }
+
 }

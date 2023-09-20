@@ -7,10 +7,12 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -54,18 +56,35 @@ public class WebSecurityConfig  {
         mupaf.setAuthenticationFailureHandler(customFailureHandler);
         mupaf.setAuthenticationManager(authManagerBuilder.getOrBuild());
         http
-                .cors(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+//                .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
-                .addFilterBefore(corsFilter, ChannelProcessingFilter.class)
+//                .addFilterBefore(corsFilter, ChannelProcessingFilter.class)
                 .addFilterAt(mupaf, UsernamePasswordAuthenticationFilter.class)
-                .authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())
+                .authorizeHttpRequests((authorize) -> authorize
+                        .anyRequest().permitAll())
+//                        .anyRequest().authenti/cated())
 //                .authorizeHttpRequests((requests) -> requests
 //                        .requestMatchers("/test/check").authenticated()
 //                        .requestMatchers("/login").permitAll()
 //                        .anyRequest().authenticated())
 //                .formLogin(withDefaults())
-                .logout(LogoutConfigurer::permitAll);
+                .logout(LogoutConfigurer::permitAll)
+                .userDetailsService(userDetailsService);
         return http.build();
+    }
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.setAllowedOrigins(Arrays.asList("https://localhost:8080"));
+        configuration.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList( "authorization", "content-type", "xsrf-token"));
+        configuration.setAllowCredentials(true);
+        configuration.addAllowedOrigin("http://localhost:8080");
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
 //    @Bean
