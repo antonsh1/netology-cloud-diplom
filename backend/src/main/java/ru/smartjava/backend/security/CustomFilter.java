@@ -21,7 +21,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 public class CustomFilter extends AbstractAuthenticationProcessingFilter {
 
-    protected CustomFilter() {
+    public CustomFilter() {
         super(new AntPathRequestMatcher("/login", "POST"));
     }
 

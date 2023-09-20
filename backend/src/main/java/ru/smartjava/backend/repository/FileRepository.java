@@ -12,6 +12,6 @@ public interface FileRepository {
     List<FileItem> getFileList();
     void deleteFile(String fileName);
     Optional<File> getFile(String fileName);
-    void storeFile(MultipartFile file);
+    void saveFile(MultipartFile file);
 
 }
