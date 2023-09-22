@@ -1,4 +1,7 @@
 databaseChangeLog:
   - include:
-      file: ../../sql/init.sql
-      relativeToChangeLogFile: true
+      file: sql/schema.sql
+  - include:
+      file: sql/init-ddl.sql
+  - include:
+      file: sql/init-data.sql

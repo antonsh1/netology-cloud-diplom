@@ -1,14 +1,20 @@
-package ru.smartjava.backend.security;
+package ru.smartjava.backend.handlers;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import ru.smartjava.backend.entity.EUser;
+import ru.smartjava.backend.entity.ErrorMessage;
 import ru.smartjava.backend.entity.TokenMessage;
 import ru.smartjava.backend.repository.EUserRepository;
 
@@ -16,7 +22,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Optional;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
@@ -27,14 +33,14 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             HttpServletRequest request,
             HttpServletResponse response,
             Authentication authentication) throws IOException, ServletException {
-//        System.out.println(authentication.getName() + " : " + authentication.getAuthorities());
-        PrintWriter out = response.getWriter();
         response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        Optional<EUser> eUserOptional = eUserRepository.findByLogin(authentication.getName());
-        TokenMessage tokenMessage = eUserOptional.map(eUser -> new TokenMessage(eUser.getToken())).orElseGet(() -> new TokenMessage(""));
-        out.print(gson.toJson(tokenMessage));
-        out.flush();
+        EUser eUser = eUserRepository.findByLogin(authentication.getName()).orElseThrow(
+                () -> new UsernameNotFoundException("User not found")
+        );
+        if(eUser.getToken() == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+        response.getOutputStream().println(gson.toJson(new TokenMessage(eUser.getToken())));
     }
 
 }

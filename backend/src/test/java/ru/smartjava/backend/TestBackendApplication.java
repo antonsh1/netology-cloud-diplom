@@ -13,7 +13,9 @@ public class TestBackendApplication {
 	@Bean
 	@ServiceConnection
 	PostgreSQLContainer<?> postgresContainer() {
-		return new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
+		return new PostgreSQLContainer<>(
+				DockerImageName.parse("postgres:latest")
+		);
 	}
 
 	public static void main(String[] args) {

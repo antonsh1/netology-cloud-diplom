@@ -1,22 +1,48 @@
-version: "1.0"
+version: "1"
 services:
-  postgres:
+  postgresql:
     image: postgres:latest
+    expose:
+      - 5432
     ports:
       - 5432:5432
     container_name: postgres-image
     volumes:
-      - ./backend/src/main/resources/sql/init.sql:/docker-entrypoint-initdb.d/1-init.sql
-
+      - ./backend/src/main/resources/sql/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_DB=postgres
       - POSTGRES_PASSWORD=postgres
-#  nodejs:
-#    image: node:latest
-#    ports:
-#      - 8080:8080
-#    container_name: nodejs-image
-#    volumes:
-#      - ./frontend/:/usr/src/app/my-app
-#      - /usr/src/app/my-app/node_modules
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  backend:
+    image: openjdk:17-jdk-slim
+    expose:
+      - 8888
+    ports:
+      - 8888:8888
+    container_name: backend-image
+    volumes:
+      - ./backend/build/libs/backend-0.0.1-SNAPSHOT.jar:/application/app.jar
+    command: ['java', '-jar', '/application/app.jar']
+    depends_on:
+      postgresql:
+        condition: service_healthy
+  frontend:
+    image: node:18.18
+    ports:
+      - 8080:8080
+    container_name: nodejs-image
+    working_dir: /usr/src/app
+    environment:
+      NODE_PATH: /usr/src/app/node_modules/
+    volumes:
+      - ./frontend:/usr/src/app
+      - /usr/src/app/node_modules
+    command: bash -c "npm install && npm run serve"
+    depends_on:
+      backend:
+        condition: service_started

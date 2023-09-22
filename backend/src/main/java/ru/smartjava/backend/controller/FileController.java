@@ -1,5 +1,7 @@
 package ru.smartjava.backend.controller;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -13,7 +15,6 @@ import ru.smartjava.backend.service.FileService;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Objects;
 
 @Controller
 @RequestMapping
@@ -26,33 +27,34 @@ public class FileController {
     //    @RolesAllowed({"UPLOAD"})
 //    @Secured({"DOWNLOAD"})
     @GetMapping(value = "list")
-    ResponseEntity<List<FileItem>> list(@RequestParam Integer limit) {
+    ResponseEntity<List<FileItem>> list(@NotNull @RequestParam Integer limit) {
         return ResponseEntity.ok(fileService.getFileList(limit));
     }
 
     @DeleteMapping("file")
-    ResponseEntity<Object> deleteFile(@RequestParam String filename) {
+    ResponseEntity<Object> deleteFile(@NotNull @RequestParam String filename) {
         fileService.deleteFile(filename);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("file")
-    @ResponseBody
-    public ResponseEntity<Resource> downloadFile(@RequestParam String filename) {
-        Resource file = fileService.loadAsResource(filename);
-        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"" + StandardCharsets.UTF_8.encode(Objects.requireNonNull(file.getFilename())) + "\"").body(file);
+    public ResponseEntity<Resource> downloadFile(@NotNull @RequestParam String filename) {
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + StandardCharsets.UTF_8.encode(filename) + "\"")
+                .body(fileService.loadAsResource(filename));
     }
 
     @PostMapping("file")
-    ResponseEntity<Object> uploadFile(@RequestParam String filename, @RequestParam("file") MultipartFile file) {
+    ResponseEntity<Object> uploadFile(@NotNull @RequestParam String filename, @NotNull @RequestParam("file") MultipartFile file) {
         fileService.storeFile(file);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("file")
-    ResponseEntity<Object> renameFile(@RequestParam String filename, @RequestBody FileToRename fileToRename) {
-        System.out.println(filename);
+    ResponseEntity<Object> renameFile(@NotNull @RequestParam String filename, @NotNull @Valid @RequestBody FileToRename fileToRename) {
+        fileService.renameFile(filename, fileToRename.getFilename());
         return ResponseEntity.ok().build();
     }
 }

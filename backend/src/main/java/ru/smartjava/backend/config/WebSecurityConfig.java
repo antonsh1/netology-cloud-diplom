@@ -1,37 +1,31 @@
 package ru.smartjava.backend.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import ru.smartjava.backend.security.CorsFilter;
-import ru.smartjava.backend.security.CustomAuthenticationFailureHandler;
-import ru.smartjava.backend.security.CustomAuthenticationSuccessHandler;
-import ru.smartjava.backend.security.CustomFilter;
+import ru.smartjava.backend.handlers.CustomAuthenticationFailureHandler;
+import ru.smartjava.backend.handlers.CustomAuthenticationSuccessHandler;
+import ru.smartjava.backend.handlers.CustomLogoutHandler;
+import ru.smartjava.backend.security.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -39,7 +33,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @RequiredArgsConstructor
 @EnableMethodSecurity(securedEnabled = true, prePostEnabled = true, jsr250Enabled = true)
-public class WebSecurityConfig  {
+public class WebSecurityConfig {
 
     private final UserDetailsService userDetailsService;
 
@@ -48,8 +42,9 @@ public class WebSecurityConfig  {
     private final CustomAuthenticationSuccessHandler customSuccessHandler;
 
     private final CustomAuthenticationFailureHandler customFailureHandler;
-
+    private final CustomLogoutHandler customLogoutHandler;
     private final CorsFilter corsFilter;
+    private final AuthenticationEntryPoint authenticationEntryPoint;
 
 //    public ObjectMapper configureJson() {
 //        return new Jackson2ObjectMapperBuilder()
@@ -74,36 +69,57 @@ public class WebSecurityConfig  {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        CustomFilter mupaf = new CustomFilter();
-        mupaf.setAuthenticationSuccessHandler(customSuccessHandler);
-        mupaf.setAuthenticationFailureHandler(customFailureHandler);
-        mupaf.setAuthenticationManager(authManagerBuilder.getOrBuild());
+    public SecurityFilterChain filterChain(HttpSecurity http, TokenSecurityContextRepository tokenSecurityContextRepository) throws Exception {
+
+        CustomFilter customFilter = new CustomFilter();
+        customFilter.setAuthenticationSuccessHandler(customSuccessHandler);
+        customFilter.setAuthenticationFailureHandler(customFailureHandler);
+        customFilter.setAuthenticationManager(authManagerBuilder.getOrBuild());
         http
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(handler -> handler.authenticationEntryPoint(authenticationEntryPoint))
+                .exceptionHandling(httpSecurityExceptionHandlingConfigurer ->
+                        new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                .securityContext(context -> context.securityContextRepository(tokenSecurityContextRepository))
+//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 //                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 //                .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
-//                .addFilterBefore(corsFilter, ChannelProcessingFilter.class)
-                .addFilterAt(mupaf, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(corsFilter, ChannelProcessingFilter.class)
+                .addFilterAt(customFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((authorize) -> authorize
-                        .anyRequest().permitAll())
-//                        .anyRequest().authenti/cated())
+//                        .anyRequest().permitAll())
+                        .anyRequest().authenticated()
+                )
 //                .authorizeHttpRequests((requests) -> requests
 //                        .requestMatchers("/test/check").authenticated()
 //                        .requestMatchers("/login").permitAll()
 //                        .anyRequest().authenticated())
-//                .formLogin(withDefaults())
-                .logout(LogoutConfigurer::permitAll)
-                .userDetailsService(userDetailsService);
+                .formLogin(AbstractHttpConfigurer::disable)
+                .logout(logout -> logout.addLogoutHandler(customLogoutHandler));
+//                .logout(LogoutConfigurer::permitAll);
+//                .userDetailsService(userDetailsService);
         return http.build();
     }
+
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedOrigins(Arrays.asList("https://localhost:8080"));
-        configuration.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList( "authorization", "content-type", "xsrf-token"));
+        configuration.setAllowedOrigins(List.of("https://localhost:8080"));
+        configuration.setAllowedMethods(List.of(
+                        HttpMethod.GET.name(),
+                        HttpMethod.PUT.name(),
+                        HttpMethod.POST.name(),
+                        HttpMethod.DELETE.name()
+                )
+        );
+        configuration.setAllowedHeaders(
+                List.of(
+                        HttpHeaders.AUTHORIZATION,
+                        HttpHeaders.CONTENT_TYPE,
+                        HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS,
+                        HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN
+                )
+        );
         configuration.setAllowCredentials(true);
         configuration.addAllowedOrigin("http://localhost:8080");
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

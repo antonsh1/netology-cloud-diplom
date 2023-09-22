@@ -30,15 +30,18 @@ public class CustomFilter extends AbstractAuthenticationProcessingFilter {
             HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
         String username, password;
-        Cookie[] testCookies = request.getCookies();
-        String token = null;
-        if( testCookies != null || testCookies.length > 0 ) {
-            token = Arrays.stream(testCookies).filter(cookie -> cookie.getName().equals("auth-token")).findFirst().get().getValue();
-        }
-        System.out.println(token);
-        final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        Optional tokenParam = Optional.ofNullable(request.getHeader(AUTHORIZATION)); //Authorization: Bearer TOKEN
-        String test = request.getHeader(AUTHORIZATION);
+//        Cookie[] allCookies = request.getCookies();
+//        if(allCookies == null) {
+//
+//        }
+//        String token = null;
+//        if( testCookies != null || testCookies.length > 0 ) {
+//            token = Arrays.stream(testCookies).filter(cookie -> cookie.getName().equals("auth-token")).findFirst().get().getValue();
+//        }
+//        System.out.println(token);
+//        final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+//        Optional tokenParam = Optional.ofNullable(request.getHeader(AUTHORIZATION)); //Authorization: Bearer TOKEN
+//        String test = request.getHeader(AUTHORIZATION);
         try {
             Map<String, String> requestMap = new ObjectMapper().readValue(request.getInputStream(), Map.class);
             username = requestMap.get("login");

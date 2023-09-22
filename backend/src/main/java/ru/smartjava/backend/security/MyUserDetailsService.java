@@ -1,62 +1,11 @@
 package ru.smartjava.backend.security;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
-import ru.smartjava.backend.entity.ERole;
-import ru.smartjava.backend.entity.EUser;
-import ru.smartjava.backend.repository.EUserRepository;
 
-import java.util.*;
+public interface MyUserDetailsService extends UserDetailsService {
 
-@Service
-@RequiredArgsConstructor
-public class MyUserDetailsService implements UserDetailsService {
+    UserDetails loadUserByUsername(String login);
 
-    private final EUserRepository userRepository;
-
-    @Override
-    public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
-        Optional<EUser> tmpUser = userRepository.findByLogin(login);
-        if (tmpUser.isEmpty()) {
-            return new org.springframework.security.core.userdetails.User(
-                    " ", " ", true, true, true, true,
-                    getAuthorities(Collections.EMPTY_SET));
-        }
-        String token = UUID.randomUUID().toString();
-        EUser user = tmpUser.get();
-        user.setToken(token);
-        userRepository.save(user);
-        return new org.springframework.security.core.userdetails.User(
-                user.getLogin(), user.getPassword(), true, true, true,
-                true, getAuthorities(user.getRoles()));
-    }
-
-    private Collection<? extends GrantedAuthority> getAuthorities(
-            Collection<ERole> roles) {
-
-        return getGrantedAuthorities(getPrivileges(roles));
-    }
-
-    private List<String> getPrivileges(Collection<ERole> roles) {
-
-        List<String> privileges = new ArrayList<>();
-        for (ERole role : roles) {
-            privileges.add(role.getName());
-        }
-        return privileges;
-    }
-
-    private List<GrantedAuthority> getGrantedAuthorities(List<String> privileges) {
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        for (String privilege : privileges) {
-
-            authorities.add(new SimpleGrantedAuthority(privilege));
-        }
-        return authorities;
-    }
+    UserDetails loadUserByToken(String token);
 }

@@ -16,4 +16,6 @@ public interface FileService {
 
     void storeFile(MultipartFile file);
 
+    void renameFile(String sourceFileName, String destinationFileName);
+
 }
