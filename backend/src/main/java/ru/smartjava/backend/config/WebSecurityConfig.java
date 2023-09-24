@@ -1,6 +1,7 @@
 package ru.smartjava.backend.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Customizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -24,11 +25,15 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import ru.smartjava.backend.handlers.CustomAuthenticationFailureHandler;
 import ru.smartjava.backend.handlers.CustomAuthenticationSuccessHandler;
 import ru.smartjava.backend.handlers.CustomLogoutHandler;
-import ru.smartjava.backend.security.*;
+import ru.smartjava.backend.security.CorsFilter;
+import ru.smartjava.backend.security.CustomFilter;
+import ru.smartjava.backend.security.TokenSecurityContextRepository;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import static org.springframework.security.config.Customizer.withDefaults;
+import static org.springframework.web.cors.CorsConfiguration.ALL;
 
 @Configuration
 @RequiredArgsConstructor
@@ -76,19 +81,21 @@ public class WebSecurityConfig {
         customFilter.setAuthenticationFailureHandler(customFailureHandler);
         customFilter.setAuthenticationManager(authManagerBuilder.getOrBuild());
         http
+//                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .exceptionHandling(handler -> handler.authenticationEntryPoint(authenticationEntryPoint))
                 .exceptionHandling(httpSecurityExceptionHandlingConfigurer ->
                         new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 .securityContext(context -> context.securityContextRepository(tokenSecurityContextRepository))
 //                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+//                .cors(Customizer.withDefaults())
 //                .cors(AbstractHttpConfigurer::disable)
-                .csrf(AbstractHttpConfigurer::disable)
+//                .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(corsFilter, ChannelProcessingFilter.class)
                 .addFilterAt(customFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((authorize) -> authorize
 //                        .anyRequest().permitAll())
-                        .anyRequest().authenticated()
+                                .anyRequest().authenticated()
                 )
 //                .authorizeHttpRequests((requests) -> requests
 //                        .requestMatchers("/test/check").authenticated()
@@ -104,7 +111,7 @@ public class WebSecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("https://localhost:8080"));
+//        configuration.setAllowedOrigins(List.of("https://localhost:8080"));
         configuration.setAllowedMethods(List.of(
                         HttpMethod.GET.name(),
                         HttpMethod.PUT.name(),
@@ -117,11 +124,16 @@ public class WebSecurityConfig {
                         HttpHeaders.AUTHORIZATION,
                         HttpHeaders.CONTENT_TYPE,
                         HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS,
-                        HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN
+                        HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
+                        HttpHeaders.ORIGIN
                 )
         );
         configuration.setAllowCredentials(true);
-        configuration.addAllowedOrigin("http://localhost:8080");
+//        configuration.setAllowedOriginPatterns(List.of("*"));
+//        configuration.setAllowedOrigins(List.of("*"));
+//        configuration.setAllowedOrigins(List.of("http://localhost:8080"));
+        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:8080"));
+//        configuration.addAllowedOrigin("http://localhost:8080");
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

@@ -25,8 +25,13 @@ public class FileRepositoryImpl implements FileRepository {
     @Value("${cloud-settings.filestorepath}")
     private String fileStorePath;
 
-    public List<File> getFileList() {
-        return Arrays.stream(Objects.requireNonNull(new File(fileStorePath).listFiles())).toList();
+    public List<File> getFileList(Integer limit) {
+        return Arrays.stream(Objects.requireNonNull(new File(fileStorePath).listFiles())).limit(limit).toList();
+    }
+
+    @Override
+    public Optional<File> findFile(String fileName) {
+        return Arrays.stream(Objects.requireNonNull(new File(fileStorePath).listFiles())).filter(file -> file.getName().equals(fileName)).findFirst();
     }
 
     @Override

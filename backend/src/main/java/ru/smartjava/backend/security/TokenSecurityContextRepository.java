@@ -28,22 +28,23 @@ public class TokenSecurityContextRepository implements SecurityContextRepository
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
-            throw new UsernameNotFoundException("");
-//            return context;
+//            throw new UsernameNotFoundException("");
+            return context;
         }
 //            return context;
 //        Optional<String> token = Arrays.stream(cookies).filter(cookie -> cookie.getName().equals("auth-token")).map(Cookie::getValue).findAny();
-        String token = Arrays.stream(cookies).filter(cookie -> cookie.getName().equals("auth-token")).map(Cookie::getValue).findAny().orElseThrow(
-                () -> new UsernameNotFoundException("auth-token not found")
-        );
-//        if(token.isEmpty()) {
-//            return context;
-//        }
+        Optional<String> token = Arrays.stream(cookies).filter(cookie -> cookie.getName().equals("auth-token")).map(Cookie::getValue).findAny();
+//                .orElseThrow(
+//                () -> new UsernameNotFoundException("auth-token not found")
+//        );
+        if(token.isEmpty()) {
+            return context;
+        }
 
-        UserDetails userDetails = userDetailsService.loadUserByToken(token);
+        UserDetails userDetails = userDetailsService.loadUserByToken(token.get());
         if (!userDetails.isEnabled()) {
-            throw new UsernameNotFoundException("");
-//            return context;
+//            throw new UsernameNotFoundException("");
+            return context;
         }
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
                 new UsernamePasswordAuthenticationToken(userDetails, null,

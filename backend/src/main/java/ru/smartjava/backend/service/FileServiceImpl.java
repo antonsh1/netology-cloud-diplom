@@ -29,7 +29,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public List<FileItem> getFileList(Integer numberFiles) {
         return fileRepository
-                .getFileList()
+                .getFileList(numberFiles)
                 .stream()
                 .map(file -> new FileItem(file.getName(), Math.toIntExact(file.length())))
                 .toList();
@@ -37,7 +37,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void deleteFile(String fileName) {
-        Optional<File> fileToDelete = fileRepository.getFileList().stream().filter(file -> file.getName().equals(fileName)).findFirst();
+        Optional<File> fileToDelete = fileRepository.findFile(fileName);
         if (fileToDelete.isPresent()) {
             if (!fileRepository.deleteFile(fileToDelete.get())) {
                 throw new CustomInternalServerError("Ошибка удаления файла " + fileName);
