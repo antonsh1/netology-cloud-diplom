@@ -5,8 +5,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import ru.smartjava.backend.config.Constants;
 
 import java.io.IOException;
 
@@ -14,18 +16,13 @@ import java.io.IOException;
 public class CorsFilter extends OncePerRequestFilter {
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,"http://localhost:8080");
-        response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
-        response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, "GET, POST, PUT, DELETE, OPTIONS");
-        response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS,"auth-token, authorization, content-type, xsrf-token");
-//        response.setHeader("Access-Control-Allow-Origin", "http://localhost:8080");
-//        response.setHeader("Access-Control-Allow-Credentials", "true");
-//        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-////        response.setHeader("Access-Control-Max-Age", "3600");
-//        response.setHeader("Access-Control-Allow-Headers", "auth-token, authorization, content-type, xsrf-token");
-////        response.addHeader("Access-Control-Expose-Headers", "xsrf-token");
-        if ("OPTIONS".equals(request.getMethod())) {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, Constants.originAddress);
+        response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, Constants.allowCredentials.toString());
+        response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, Constants.allowMethodsList);
+        response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS,Constants.allowHeadersList);
+        if (HttpMethod.OPTIONS.name().equals(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
         } else {
             filterChain.doFilter(request, response);

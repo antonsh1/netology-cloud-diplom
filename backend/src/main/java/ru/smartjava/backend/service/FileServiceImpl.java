@@ -6,6 +6,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.smartjava.backend.config.Constants;
 import ru.smartjava.backend.entity.FileItem;
 import ru.smartjava.backend.exceptions.CustomInternalServerError;
 import ru.smartjava.backend.repository.FileRepository;
@@ -40,10 +41,10 @@ public class FileServiceImpl implements FileService {
         Optional<File> fileToDelete = fileRepository.findFile(fileName);
         if (fileToDelete.isPresent()) {
             if (!fileRepository.deleteFile(fileToDelete.get())) {
-                throw new CustomInternalServerError("Ошибка удаления файла " + fileName);
+                throw new CustomInternalServerError(String.format("%s: %s", Constants.fileDeleteError,fileName));
             }
         } else {
-            throw new CustomInternalServerError("Файл не найден " + fileName);
+            throw new CustomInternalServerError(String.format("%s: %s", Constants.fileNotFound, fileName));
         }
     }
 
@@ -64,12 +65,12 @@ public class FileServiceImpl implements FileService {
                 return resource;
             }
         }
-        throw new CustomInternalServerError("Файл не найден: " + fileName);
+        throw new CustomInternalServerError(String.format("%s: %s", Constants.fileNotFound, fileName));
     }
 
     public void storeFile(MultipartFile file) {
         if(!fileRepository.saveFile(file)) {
-            throw new CustomInternalServerError("Ошибка сохранения файла " + file.getName());
+            throw new CustomInternalServerError(String.format("%s: %s", Constants.saveFileError, file.getName()));
         };
     }
 
@@ -78,10 +79,10 @@ public class FileServiceImpl implements FileService {
         File destinationFile = new File(fileStorePath + "/" + destinationFileName);
         if (sourceFile.exists()) {
             if (!fileRepository.renameFile(sourceFile, destinationFile)) {
-                throw new CustomInternalServerError(String.format("Ошибка переименования файла из %s в %s", sourceFileName, destinationFileName) );
+                throw new CustomInternalServerError(String.format("%s из %s в %s", Constants.renameFileError, sourceFileName, destinationFileName) );
             }
         } else {
-            throw new CustomInternalServerError("Файл источник остутствует: " + sourceFileName);
+            throw new CustomInternalServerError(String.format("%s: %s", Constants.sourceFileAbsent, sourceFileName));
         }
     }
 

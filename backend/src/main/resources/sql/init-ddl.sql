@@ -1,16 +1,22 @@
-create table erole
+create table netology.erole
 (
     name varchar(20) not null
         primary key
         constraint erole_name_check
             check ((name)::text = ANY
-                   ((ARRAY ['UPLOAD'::character varying, 'DOWNLOAD'::character varying, 'RENAME'::character varying])::text[]))
+                   (ARRAY [
+                       ('UPLOAD'::character varying)::text,
+                       ('DOWNLOAD'::character varying)::text,
+                       ('RENAME'::character varying)::text,
+                        ('DELETE'::character varying)::text
+                       ])
+                )
 );
 
-alter table erole
+alter table netology.erole
     owner to postgres;
 
-create table euser
+create table netology.euser
 (
     id       bigserial
         primary key,
@@ -19,20 +25,18 @@ create table euser
     token    varchar(255)
 );
 
-alter table euser
+alter table netology.euser
     owner to postgres;
 
-create table euser_roles
+create table netology.euser_roles
 (
     euser_id   bigint      not null
         constraint fkk4jqyxw12die2tdwjpaxttna5
-            references euser,
+            references netology.euser,
     roles_name varchar(20) not null
         constraint uk_llt2f6ljpse7mtulb0uo33ile
-            unique
-        constraint fkdqwlxb08lnekp7ppr3u79jisk
-            references erole
+            references netology.erole
 );
 
-alter table euser_roles
+alter table netology.euser_roles
     owner to postgres;

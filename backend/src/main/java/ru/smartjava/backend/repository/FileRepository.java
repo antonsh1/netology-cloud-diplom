@@ -9,13 +9,10 @@ import java.util.Optional;
 public interface FileRepository {
 
     List<File> getFileList(Integer limit);
-
     Optional<File> findFile(String file);
     Boolean deleteFile(File file);
-
     Optional<File> getFile(String fileName);
     Boolean saveFile(MultipartFile file);
-
     Boolean renameFile(File sourceFile, File destinationFile);
 
 }

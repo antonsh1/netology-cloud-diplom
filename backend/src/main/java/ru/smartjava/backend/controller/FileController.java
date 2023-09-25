@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,24 +20,23 @@ import java.util.List;
 @Controller
 @RequestMapping
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:8080", allowCredentials = "true", allowedHeaders = {"auth-token, authorization, content-type, xsrf-token"}, maxAge = 3600)
 public class FileController {
 
     private final FileService fileService;
 
-    //    @RolesAllowed({"UPLOAD"})
-//    @Secured({"DOWNLOAD"})
     @GetMapping(value = "list")
     ResponseEntity<List<FileItem>> list(@NotNull @RequestParam Integer limit) {
         return ResponseEntity.ok(fileService.getFileList(limit));
     }
 
+    @Secured({"DELETE"})
     @DeleteMapping("file")
     ResponseEntity<Object> deleteFile(@NotNull @RequestParam String filename) {
         fileService.deleteFile(filename);
         return ResponseEntity.ok().build();
     }
 
+    @Secured({"DOWNLOAD"})
     @GetMapping("file")
     public ResponseEntity<Resource> downloadFile(@NotNull @RequestParam String filename) {
         return ResponseEntity
@@ -46,12 +46,14 @@ public class FileController {
                 .body(fileService.loadAsResource(filename));
     }
 
+    @Secured({"UPLOAD"})
     @PostMapping("file")
     ResponseEntity<Object> uploadFile(@NotNull @RequestParam String filename, @NotNull @RequestParam("file") MultipartFile file) {
         fileService.storeFile(file);
         return ResponseEntity.ok().build();
     }
 
+    @Secured({"RENAME"})
     @PutMapping("file")
     ResponseEntity<Object> renameFile(@NotNull @RequestParam String filename, @NotNull @Valid @RequestBody FileToRename fileToRename) {
         fileService.renameFile(filename, fileToRename.getFilename());

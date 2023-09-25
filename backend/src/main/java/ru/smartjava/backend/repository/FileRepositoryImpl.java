@@ -18,7 +18,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Repository
-//@ConfigurationProperties("cloud-settings")
 @Setter
 public class FileRepositoryImpl implements FileRepository {
 

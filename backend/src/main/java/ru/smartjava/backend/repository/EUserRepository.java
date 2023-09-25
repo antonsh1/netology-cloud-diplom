@@ -15,11 +15,8 @@ public interface EUserRepository extends JpaRepository<EUser, Long> {
 
     Optional<EUser> findByLogin(String login);
     Optional<EUser> findByToken(String token);
-
     @Transactional
     @Modifying
     @Query("update EUser eu set eu.token=null where eu.id=:id")
     void clearTokenForUserById(@Param("id") Long id);
-
-    Boolean existsByLogin(String login);
 }

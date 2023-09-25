@@ -24,7 +24,7 @@ public class EUser {
     @NotNull
     @NotBlank
     @Size(max = 50)
-//    @UniqueElements
+    @UniqueElements
     String login;
 
     @NotNull
