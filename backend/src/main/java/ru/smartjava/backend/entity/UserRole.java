@@ -1,20 +1,16 @@
 //package ru.smartjava.backend.entity;
 //
-//import jakarta.persistence.EmbeddedId;
-//import jakarta.persistence.Entity;
-//import jakarta.persistence.ManyToOne;
+//import jakarta.persistence.*;
 //
 //@Entity
 //public class UserRole {
 //
-//    @EmbeddedId
-//    RoleUserKey id;
-//
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    Long Id;
 //    @ManyToOne
 //    EUser eUser;
-//
-//    @ManyToOne
+////    @ManyToOne
 //    ERole eRole;
-//
 //
 //}

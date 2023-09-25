@@ -31,10 +31,8 @@ alter table netology.euser
 create table netology.euser_roles
 (
     euser_id   bigint      not null
-        constraint fkk4jqyxw12die2tdwjpaxttna5
             references netology.euser,
     roles_name varchar(20) not null
-        constraint uk_llt2f6ljpse7mtulb0uo33ile
             references netology.erole
 );
 
