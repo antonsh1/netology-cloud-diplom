@@ -28,7 +28,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     public void onAuthenticationSuccess(
             HttpServletRequest request,
             HttpServletResponse response,
-            Authentication authentication) throws IOException, ServletException {
+            Authentication authentication) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF8");
         EUser eUser = eUserRepository.findByLogin(authentication.getName()).orElseThrow(
@@ -37,8 +37,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         if (eUser.getToken() == null) {
             throw new UsernameNotFoundException(Constants.userNotFound);
         }
-        TokenMessage tokenMessage = new TokenMessage(eUser.getToken());
-        response.getWriter().println(gson.toJson(tokenMessage));
+        response.getWriter().println(gson.toJson(new TokenMessage(eUser.getToken())));
         response.getWriter().flush();
     }
 }

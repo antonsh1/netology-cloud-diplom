@@ -35,10 +35,7 @@ public class EUser {
     @Size(max = 255)
     String token;
 
-//    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, targetEntity = ERole.class, mappedBy = "name")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-//    @JoinColumn(name = "user_role")
-//            ()
     private Collection<ERole> roles;
 
 }

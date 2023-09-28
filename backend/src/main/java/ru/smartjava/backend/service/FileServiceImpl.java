@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.smartjava.backend.config.Constants;
 import ru.smartjava.backend.entity.FileItem;
+import ru.smartjava.backend.exceptions.BadRequestException;
 import ru.smartjava.backend.exceptions.CustomInternalServerError;
 import ru.smartjava.backend.repository.FileRepository;
 
@@ -69,6 +70,9 @@ public class FileServiceImpl implements FileService {
     }
 
     public void storeFile(MultipartFile file) {
+        if(file == null) {
+            throw new BadRequestException("Отсутствтует вложение");
+        }
         if(!fileRepository.saveFile(file)) {
             throw new CustomInternalServerError(String.format("%s: %s", Constants.saveFileError, file.getName()));
         };

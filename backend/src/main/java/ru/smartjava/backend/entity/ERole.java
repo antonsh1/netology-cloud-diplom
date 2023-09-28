@@ -14,10 +14,6 @@ public class ERole {
         DELETE
 
     }
-//
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    Long id;
 
     @Id
     @Enumerated(EnumType.STRING)

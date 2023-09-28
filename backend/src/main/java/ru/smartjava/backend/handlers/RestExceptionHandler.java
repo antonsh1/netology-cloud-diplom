@@ -9,7 +9,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestValueException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MultipartException;
 import ru.smartjava.backend.entity.ErrorMessage;
+import ru.smartjava.backend.exceptions.BadRequestException;
 import ru.smartjava.backend.exceptions.CustomInternalServerError;
 
 import java.nio.file.AccessDeniedException;
@@ -17,21 +19,15 @@ import java.nio.file.AccessDeniedException;
 @RestControllerAdvice
 public class RestExceptionHandler {
 
-//    RuntimeException.class,
-    @ExceptionHandler({ CustomInternalServerError.class})
+    @ExceptionHandler({ RuntimeException.class, CustomInternalServerError.class})
     public ResponseEntity<?> handleCustomInternalServerError(Exception ex) {
         return ResponseEntity.internalServerError().body(new ErrorMessage(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage()));
     }
 
-    @ExceptionHandler({MethodArgumentNotValidException.class, FileSizeLimitExceededException.class, HttpMessageConversionException.class, MissingRequestValueException.class})
+    @ExceptionHandler({BadRequestException.class, MultipartException.class, MethodArgumentNotValidException.class, FileSizeLimitExceededException.class, HttpMessageConversionException.class, MissingRequestValueException.class})
     public ResponseEntity<ErrorMessage> handleCustomBadRequestsException(
             Exception ex) {
         return ResponseEntity.badRequest().body(new ErrorMessage(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage()));
     }
-//    AccessDeniedException.class
-    @ExceptionHandler({RuntimeException.class})
-    public ResponseEntity<ErrorMessage> handleAccessDeniedExceptionException(
-            Exception ex) {
-        return ResponseEntity.badRequest().body(new ErrorMessage(HttpServletResponse.SC_FORBIDDEN, ex.getMessage()));
-    }
+
 }
