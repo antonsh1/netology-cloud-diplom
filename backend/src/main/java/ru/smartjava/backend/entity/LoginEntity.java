@@ -14,7 +14,7 @@ import ru.smartjava.backend.config.Constants;
 public class LoginEntity {
 
     @SerializedName(Constants.loginField)
-    String login;
+    private String login;
     @SerializedName(Constants.passwordField)
-    String password;
+    private String password;
 }

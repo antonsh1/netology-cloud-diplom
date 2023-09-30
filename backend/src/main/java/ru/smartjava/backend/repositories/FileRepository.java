@@ -1,4 +1,4 @@
-package ru.smartjava.backend.repository;
+package ru.smartjava.backend.repositories;
 
 import org.springframework.web.multipart.MultipartFile;
 

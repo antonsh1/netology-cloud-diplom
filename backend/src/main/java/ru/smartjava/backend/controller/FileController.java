@@ -10,6 +10,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.smartjava.backend.config.Constants;
 import ru.smartjava.backend.entity.FileItem;
 import ru.smartjava.backend.entity.FileToRename;
 import ru.smartjava.backend.service.FileService;
@@ -24,20 +25,20 @@ public class FileController {
 
     private final FileService fileService;
 
-    @GetMapping(value = "list")
+    @GetMapping(value = Constants.urlListPath)
     ResponseEntity<List<FileItem>> list(@NotNull @RequestParam Integer limit) {
         return ResponseEntity.ok(fileService.getFileList(limit));
     }
 
     @Secured({"DELETE"})
-    @DeleteMapping("file")
+    @DeleteMapping(Constants.urlFilePath)
     ResponseEntity<Object> deleteFile(@NotNull @RequestParam String filename) {
         fileService.deleteFile(filename);
         return ResponseEntity.ok().build();
     }
 
     @Secured({"DOWNLOAD"})
-    @GetMapping("file")
+    @GetMapping(Constants.urlFilePath)
     public ResponseEntity<Resource> downloadFile(@NotNull @RequestParam String filename) {
         return ResponseEntity
                 .ok()
@@ -47,14 +48,14 @@ public class FileController {
     }
 
     @Secured({"UPLOAD"})
-    @PostMapping("file")
+    @PostMapping(Constants.urlFilePath)
     ResponseEntity<Object> uploadFile(@NotNull @RequestParam String filename, @NotNull @RequestParam("file") MultipartFile file) {
         fileService.storeFile(file);
         return ResponseEntity.ok().build();
     }
 
     @Secured({"RENAME"})
-    @PutMapping("file")
+    @PutMapping(Constants.urlFilePath)
     ResponseEntity<Object> renameFile(@NotNull @RequestParam String filename, @NotNull @Valid @RequestBody FileToRename fileToRename) {
         fileService.renameFile(filename, fileToRename.getFilename());
         return ResponseEntity.ok().build();

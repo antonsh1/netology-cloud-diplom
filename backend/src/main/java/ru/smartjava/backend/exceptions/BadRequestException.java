@@ -1,8 +1,8 @@
-package ru.smartjava.backend.exceptions;
-
-public class BadRequestException extends RuntimeException {
-    public BadRequestException(String message) {
-        super(message);
-    }
-
-}
+//package ru.smartjava.backend.exceptions;
+//
+//public class BadRequestException extends RuntimeException {
+//    public BadRequestException(String message) {
+//        super(message);
+//    }
+//
+//}

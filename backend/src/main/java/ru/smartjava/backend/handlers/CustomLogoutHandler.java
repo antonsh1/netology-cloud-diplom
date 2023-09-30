@@ -10,7 +10,7 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 import ru.smartjava.backend.config.Constants;
 import ru.smartjava.backend.entity.EUser;
-import ru.smartjava.backend.repository.EUserRepository;
+import ru.smartjava.backend.repositories.EUserRepository;
 
 @Service
 @RequiredArgsConstructor

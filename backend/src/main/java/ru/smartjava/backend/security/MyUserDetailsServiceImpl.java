@@ -1,7 +1,6 @@
 package ru.smartjava.backend.security;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Service;
 import ru.smartjava.backend.config.Constants;
 import ru.smartjava.backend.entity.ERole;
 import ru.smartjava.backend.entity.EUser;
-import ru.smartjava.backend.repository.EUserRepository;
+import ru.smartjava.backend.repositories.EUserRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;

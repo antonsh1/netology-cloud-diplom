@@ -24,6 +24,7 @@ public class EUser {
     @NotNull
     @NotBlank
     @Size(max = 50)
+    @Column(unique=true)
 //    @UniqueElements
     String login;
 
@@ -35,7 +36,7 @@ public class EUser {
     @Size(max = 255)
     String token;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL)
     private Collection<ERole> roles;
 
 }

@@ -1,7 +1,6 @@
 package ru.smartjava.backend.handlers;
 
 import com.google.gson.Gson;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -11,9 +10,8 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Service;
 import ru.smartjava.backend.config.Constants;
 import ru.smartjava.backend.entity.EUser;
-import ru.smartjava.backend.entity.ErrorMessage;
 import ru.smartjava.backend.entity.TokenMessage;
-import ru.smartjava.backend.repository.EUserRepository;
+import ru.smartjava.backend.repositories.EUserRepository;
 
 import java.io.IOException;
 

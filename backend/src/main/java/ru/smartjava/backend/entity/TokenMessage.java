@@ -15,6 +15,6 @@ public class TokenMessage {
 
     @JsonAlias({ Constants.authTokenName })
     @SerializedName(Constants.authTokenName)
-    String authtoken;
+    private String authtoken;
 
 }

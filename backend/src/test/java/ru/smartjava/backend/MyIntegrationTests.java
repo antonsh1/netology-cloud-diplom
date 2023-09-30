@@ -3,21 +3,18 @@ package ru.smartjava.backend;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import org.junit.FixMethodOrder;
 import org.junit.jupiter.api.*;
-import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.testcontainers.containers.PostgreSQLContainer;
 import ru.smartjava.backend.config.Constants;
-import ru.smartjava.backend.controller.FileController;
 import ru.smartjava.backend.entity.ErrorMessage;
 import ru.smartjava.backend.entity.FileItem;
-import ru.smartjava.backend.entity.LoginEntity;
+import ru.smartjava.backend.entity.FileToRename;
 import ru.smartjava.backend.entity.TokenMessage;
-import ru.smartjava.backend.utils.JsonGenerator;
+import ru.smartjava.backend.utils.TestUtils;
 
 import java.io.File;
 
@@ -30,7 +27,7 @@ import static io.restassured.RestAssured.given;
 public class MyIntegrationTests {
 
     @Autowired
-    private JsonGenerator jsonGenerator;
+    private TestUtils testUtils;
 
     @Autowired
     private PostgreSQLContainer postgres;
@@ -39,12 +36,14 @@ public class MyIntegrationTests {
 
     @BeforeAll
     void start() {
+        testUtils.createTestFile();
         postgres.start();
     }
 
     @AfterAll
     void stop() {
         postgres.stop();
+        testUtils.deleteTestFile();
     }
 
     @BeforeEach
@@ -52,14 +51,14 @@ public class MyIntegrationTests {
         RestAssured.baseURI = "http://localhost:8888";
     }
 
-    @Order(1)
+    @Order(10)
     @Test
     public void testLogin() {
-        System.out.println("LOGIN");
+
         Response response = given()
                 .contentType(ContentType.JSON)
-                .when()
-                .post("/login").then().extract().response();
+                .when().post(Constants.urlLoginPath)
+                .then().extract().response();
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
         Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
@@ -67,9 +66,8 @@ public class MyIntegrationTests {
         response =
                 given()
                         .contentType(ContentType.JSON)
-                        .body(new LoginEntity("test", "test"))
-                        .when()
-                        .post("/login").then()
+                        .body(testUtils.getWrongLogin())
+                        .when().post(Constants.urlLoginPath).then()
                         .extract().response();
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
@@ -77,9 +75,9 @@ public class MyIntegrationTests {
 
         response = given()
                 .contentType(ContentType.JSON)
-                .body(jsonGenerator.getRightCredentials())
-                .when()
-                .post("/login").then().extract().response();
+                .body(testUtils.getRightLogin())
+                .when().post(Constants.urlLoginPath)
+                .then().extract().response();
 
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode());
         Assertions.assertInstanceOf(TokenMessage.class, response.as(TokenMessage.class));
@@ -87,16 +85,15 @@ public class MyIntegrationTests {
 
     }
 
-    @Order(2)
+    @Order(20)
     @Test
     public void testUploadFile() {
-        System.out.println("UPLOAD");
+
         Response response =
                 given()
                         .contentType(ContentType.MULTIPART)
                         .cookie(Constants.authTokenName, "")
-                        .when()
-                        .post("/file")
+                        .when().post(Constants.urlFilePath)
                         .then().extract().response();
 
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode());
@@ -106,8 +103,7 @@ public class MyIntegrationTests {
                 given()
                         .contentType(ContentType.MULTIPART)
                         .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
-                        .when()
-                        .post("/file")
+                        .when().post(Constants.urlFilePath)
                         .then().extract().response();
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
@@ -117,9 +113,8 @@ public class MyIntegrationTests {
                 given()
                         .contentType(ContentType.MULTIPART)
                         .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
-                        .multiPart(new File("C:\\Development\\Projects\\Netology\\netology-cloud-diplom\\backend\\src\\test\\resources\\876.txt"))
-                        .when()
-                        .post("/file")
+                        .multiPart(new File(testUtils.fileFullPath))
+                        .when().post(Constants.urlFilePath)
                         .then().extract().response();
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
         Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
@@ -129,29 +124,26 @@ public class MyIntegrationTests {
                 given()
                         .contentType(ContentType.MULTIPART)
                         .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
-                        .multiPart(new File("C:\\Development\\Projects\\Netology\\netology-cloud-diplom\\backend\\src\\test\\resources\\876.txt"))
-                        .when()
-                        .post("/file?filename=876.txt")
+                        .multiPart(new File(testUtils.fileFullPath))
+                        .when().post(Constants.urlFilePath + "?filename=" + testUtils.fileName)
                         .then().extract().response();
-
+        System.out.println(response.getBody().prettyPrint());
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode());
-//        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+        Assertions.assertEquals("", response.getBody().print());
 
     }
 
-    @Order(3)
+    @Order(30)
     @Test
     public void testList() {
-        System.out.println("LIST");
-//        System.out.println(tokenMessage);
+
         Response response =
                 given()
                         .contentType(ContentType.JSON)
                         .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
-                        .when().get("/list?limit=3")
+                        .when().get(Constants.urlListPath + "?limit=3")
                         .then().extract().response();
 
-//        System.out.println(response.getBody().prettyPrint());
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode());
         Assertions.assertInstanceOf(FileItem[].class, response.as(FileItem[].class));
 
@@ -159,9 +151,8 @@ public class MyIntegrationTests {
                 given()
                         .contentType(ContentType.JSON)
                         .cookie(Constants.authTokenName, "")
-                        .when().get("/list?limit=3")
-                        .then()
-                        .extract().response();
+                        .when().get(Constants.urlListPath + "?limit=3")
+                        .then().extract().response();
 
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode());
         Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
@@ -170,27 +161,25 @@ public class MyIntegrationTests {
                 given()
                         .contentType(ContentType.JSON)
                         .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
-                        .when().get("/list").then()
+                        .when().get(Constants.urlFilePath).then()
                         .extract().response();
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
         Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
-
 //        TODO ошибка 500 возможно ли воспроизвести
+
     }
 
-    @Order(4)
+    @Order(40)
     @Test
     public void testDownloadFile() {
-        System.out.println("DOWNLOAD");
+
         Response response =
                 given()
                         .contentType(ContentType.JSON)
                         .cookie(Constants.authTokenName, "")
-                        .when()
-                        .get("/file")
+                        .when().get(Constants.urlFilePath)
                         .then().extract().response();
-
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode());
         Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
 
@@ -198,10 +187,8 @@ public class MyIntegrationTests {
                 given()
                         .contentType(ContentType.JSON)
                         .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
-                        .when()
-                        .get("/file")
+                        .when().get(Constants.urlFilePath)
                         .then().extract().response();
-        System.out.println(response.getBody().prettyPrint());
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
         Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
 
@@ -209,25 +196,101 @@ public class MyIntegrationTests {
                 given()
                         .contentType(ContentType.JSON)
                         .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
-                        .when()
-                        .get("/file?filename=876.txt")
+                        .when().get(Constants.urlFilePath + "?filename=6.txt")
+                        .then().extract().response();
+
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatusCode());
+        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+
+        response =
+                given()
+                        .contentType(ContentType.JSON)
+                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                        .when().get(Constants.urlFilePath + "?filename=" + testUtils.fileName)
                         .then().extract().response();
 
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode());
 //        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
     }
 
-    @Order(10)
+    @Order(50)
+    @Test
+    public void testRenameFile() {
+
+        Response response =
+                given()
+                        .contentType(ContentType.JSON)
+                        .cookie(Constants.authTokenName, "")
+                        .when().put(Constants.urlFilePath)
+                        .then().extract().response();
+
+        Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode());
+        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+
+        response =
+                given()
+                        .contentType(ContentType.JSON)
+                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                        .when().put(Constants.urlFilePath)
+                        .then().extract().response();
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
+        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+
+        response =
+                given()
+                        .contentType(ContentType.JSON)
+                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                        .when().put(Constants.urlFilePath + "?filename=" + testUtils.fileName)
+                        .then().extract().response();
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
+        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+
+        response =
+                given()
+                        .contentType(ContentType.JSON)
+                        .body(new FileToRename(testUtils.renameFileName))
+                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                        .when().put(Constants.urlFilePath + "?filename=xxx.txt")
+                        .then().extract().response();
+
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatusCode());
+        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+
+        response =
+                given()
+                        .contentType(ContentType.JSON)
+                        .body(new FileToRename(testUtils.renameFileName))
+                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                        .when().put(Constants.urlFilePath + "?filename" + testUtils.fileName)
+                        .then().extract().response();
+
+        System.out.println(response.getBody().prettyPrint());
+        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode());
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(new FileToRename(testUtils.fileName))
+                .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                .when().put(Constants.urlFilePath + "?filename=" + testUtils.renameFileName);
+
+    }
+
+    @Order(60)
     @Test
     public void testLogout() {
-        System.out.println("LOGOUT");
+
         given()
                 .contentType(ContentType.JSON)
                 .cookie(Constants.authTokenName, "")
-                .when().post("/logout").then().statusCode(HttpStatus.UNAUTHORIZED.value());
+                .when().post(Constants.urlLogoutPath)
+                .then().statusCode(HttpStatus.UNAUTHORIZED.value());
+
         given()
                 .contentType(ContentType.JSON)
                 .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
-                .when().post("/logout").then().statusCode(HttpStatus.OK.value());
+                .when().post(Constants.urlLogoutPath)
+                .then().statusCode(HttpStatus.OK.value());
     }
 }

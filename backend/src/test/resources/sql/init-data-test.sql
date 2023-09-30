@@ -1,0 +1,13 @@
+insert into netology.erole (name) values ('UPLOAD');
+insert into netology.erole (name) values ('DOWNLOAD');
+insert into netology.erole (name) values ('RENAME');
+insert into netology.erole (name) values ('DELETE');
+insert into netology.euser (id, login,password) values (1, 'test','$2a$10$NjlsKOVwZZNhZGJyRfZiweg/9IES1pfYY2uVrJl0ogZQ.bZOo0QVm');
+insert into netology.euser (id, login,password) values (2, 'upload','$2a$10$NjlsKOVwZZNhZGJyRfZiweg/9IES1pfYY2uVrJl0ogZQ.bZOo0QVm');
+insert into netology.euser (id, login,password) values (3, 'download','$2a$10$NjlsKOVwZZNhZGJyRfZiweg/9IES1pfYY2uVrJl0ogZQ.bZOo0QVm');
+insert into netology.euser_roles (euser_id, roles_name) values (1,'UPLOAD');
+insert into netology.euser_roles (euser_id, roles_name) values (1,'DOWNLOAD');
+insert into netology.euser_roles (euser_id, roles_name) values (1,'RENAME');
+insert into netology.euser_roles (euser_id, roles_name) values (1,'DELETE');
+insert into netology.euser_roles (euser_id, roles_name) values (2,'UPLOAD');
+insert into netology.euser_roles (euser_id, roles_name) values (3,'DOWNLOAD');

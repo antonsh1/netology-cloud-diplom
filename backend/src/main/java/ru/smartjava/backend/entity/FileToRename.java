@@ -2,12 +2,15 @@ package ru.smartjava.backend.entity;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
+@Setter
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class FileToRename {
 
     @NotNull
     @NotBlank
-    String filename;
+    private String filename;
 }

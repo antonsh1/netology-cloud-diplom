@@ -1,6 +1,7 @@
 package ru.smartjava.backend.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
@@ -17,7 +18,8 @@ public class ERole {
 
     @Id
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
+    @Size(max = 100)
+//    @Column(length = 20, unique = true)
     private EnumRole name;
 
     public String getName() {

@@ -21,6 +21,11 @@ public class Constants {
     public final static String allowMethodsList = "GET, POST, PUT, DELETE, OPTIONS";
     public final static String allowHeadersList = "auth-token, authorization, content-type, xsrf-token";
     public final static Boolean allowCredentials = true;
+    public final static String urlFilePath = "file";
+    public final static String urlListPath = "list";
+    public final static String urlLoginPath = "login";
+    public final static String urlLogoutPath = "logout";
+
 
 
 }
