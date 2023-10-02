@@ -1,4 +1,4 @@
-package ru.smartjava.backend.handlers;
+package ru.smartjava.backend.security.handlers;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 import ru.smartjava.backend.config.Constants;
-import ru.smartjava.backend.entity.EUser;
+import ru.smartjava.backend.model.EUser;
 import ru.smartjava.backend.repositories.EUserRepository;
 
 @Service

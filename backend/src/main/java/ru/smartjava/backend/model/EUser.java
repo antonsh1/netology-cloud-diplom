@@ -1,4 +1,4 @@
-package ru.smartjava.backend.entity;
+package ru.smartjava.backend.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -7,7 +7,6 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.hibernate.validator.constraints.UniqueElements;
 
 import java.util.Collection;
 
@@ -36,7 +35,8 @@ public class EUser {
     @Size(max = 255)
     String token;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
+//            (cascade = CascadeType.ALL)
     private Collection<ERole> roles;
 
 }

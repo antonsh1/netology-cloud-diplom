@@ -1,4 +1,4 @@
-package ru.smartjava.backend.security;
+package ru.smartjava.backend.security.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;

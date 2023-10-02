@@ -1,5 +1,6 @@
 package ru.smartjava.backend.utils;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import ru.smartjava.backend.entity.LoginEntity;
 
@@ -9,29 +10,54 @@ import java.io.IOException;
 @Configuration
 public class TestUtils {
 
-    public final String fileName = "876.txt";
-    public final String renameFileName = "900.txt";
-    public final String filePath = "src\\test\\resources\\cloud-files\\";
-    public final String fileFullPath =  filePath + fileName;
+    @Value("${cloud-settings.test.filename}")
+    public String fileName;
 
+    @Value("${cloud-settings.test.rename-filename}")
+    public String renameFileName;
+
+    @Value("${cloud-settings.filestorepath}")
+    public String filePath;
+
+    @Value("${cloud-settings.test.login}")
+    public String testUserName;
+
+    @Value("${cloud-settings.test.password}")
+    public String testUserPassword;
+
+    public String urlLoginPath = "login";
+    public String urlLogoutPath = "logout";
+
+    private String getFileFullPath() {
+        System.out.println(filePath + fileName);
+        return filePath + fileName;
+    }
+
+    public File getTestFile() {
+        return new File(getFileFullPath());
+    }
 
     public LoginEntity getRightLogin() {
-        return new LoginEntity("test","password");
+        return new LoginEntity(testUserName,testUserPassword);
     }
 
     public LoginEntity getWrongLogin() {
-        return new LoginEntity("test","test");
+        return new LoginEntity(testUserName,"");
     }
 
     public void createTestFile() {
+        System.out.println(filePath);
+        if (!new File(filePath).exists()) {
+            new File(filePath).mkdirs();
+        }
         try {
-            new File(fileFullPath).createNewFile();
+            new File(getFileFullPath()).createNewFile();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void deleteTestFile() {
-        new File(fileFullPath).delete();
+        new File(getFileFullPath()).delete();
     }
 }

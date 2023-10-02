@@ -1,14 +1,15 @@
-package ru.smartjava.backend.security;
+package ru.smartjava.backend.security.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.smartjava.backend.config.Constants;
-import ru.smartjava.backend.entity.ERole;
-import ru.smartjava.backend.entity.EUser;
+import ru.smartjava.backend.model.ERole;
+import ru.smartjava.backend.model.EUser;
 import ru.smartjava.backend.repositories.EUserRepository;
 
 import java.util.*;
@@ -16,13 +17,14 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class MyUserDetailsServiceImpl implements MyUserDetailsService {
+public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
 
     private final EUserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
-        EUser user = userRepository.findByLogin(login).orElseThrow(() -> new UsernameNotFoundException(String.format("%s %s", Constants.userNotFound ,login)));
+        EUser user = userRepository.findByLogin(login).orElseThrow(() ->
+                new AuthenticationServiceException(String.format("%s %s", Constants.userNotFound ,login)));
         user.setToken(UUID.randomUUID().toString());
         userRepository.save(user);
         return new org.springframework.security.core.userdetails.User(
@@ -34,7 +36,7 @@ public class MyUserDetailsServiceImpl implements MyUserDetailsService {
     @Override
     public UserDetails loadUserByToken(String token) throws UsernameNotFoundException {
         EUser user = userRepository.findByToken(token).orElseThrow(() ->
-                new UsernameNotFoundException(String.format("%s %s",Constants.tokenNotFound,token))
+                new AuthenticationServiceException(String.format("%s %s", Constants.tokenNotFound,token))
         );
         return new org.springframework.security.core.userdetails.User(
                 user.getLogin(), user.getPassword(), true, true, true,

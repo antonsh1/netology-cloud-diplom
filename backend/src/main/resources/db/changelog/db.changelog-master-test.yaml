@@ -4,7 +4,5 @@ databaseChangeLog:
   - include:
       file: sql/init-ddl.sql
   - include:
-      file: sql/init-data.sql
-  - include:
       file: sql/init-data-test.sql
 

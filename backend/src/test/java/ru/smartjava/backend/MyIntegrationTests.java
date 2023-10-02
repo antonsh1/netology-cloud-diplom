@@ -6,17 +6,15 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
-import org.testcontainers.containers.PostgreSQLContainer;
 import ru.smartjava.backend.config.Constants;
 import ru.smartjava.backend.entity.ErrorMessage;
 import ru.smartjava.backend.entity.FileItem;
 import ru.smartjava.backend.entity.FileToRename;
 import ru.smartjava.backend.entity.TokenMessage;
 import ru.smartjava.backend.utils.TestUtils;
-
-import java.io.File;
 
 import static io.restassured.RestAssured.given;
 
@@ -26,29 +24,27 @@ import static io.restassured.RestAssured.given;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MyIntegrationTests {
 
-    @Autowired
-    private TestUtils testUtils;
+    @LocalServerPort
+    private Long port;
 
     @Autowired
-    private PostgreSQLContainer postgres;
+    private TestUtils testUtils;
 
     private TokenMessage tokenMessage;
 
     @BeforeAll
     void start() {
         testUtils.createTestFile();
-        postgres.start();
     }
 
     @AfterAll
     void stop() {
-        postgres.stop();
         testUtils.deleteTestFile();
     }
 
     @BeforeEach
     void setUp() {
-        RestAssured.baseURI = "http://localhost:8888";
+        RestAssured.baseURI = "http://localhost:" + port;
     }
 
     @Order(10)
@@ -57,7 +53,7 @@ public class MyIntegrationTests {
 
         Response response = given()
                 .contentType(ContentType.JSON)
-                .when().post(Constants.urlLoginPath)
+                .when().post(testUtils.urlLoginPath)
                 .then().extract().response();
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
@@ -67,7 +63,7 @@ public class MyIntegrationTests {
                 given()
                         .contentType(ContentType.JSON)
                         .body(testUtils.getWrongLogin())
-                        .when().post(Constants.urlLoginPath).then()
+                        .when().post(testUtils.urlLoginPath).then()
                         .extract().response();
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
@@ -76,9 +72,10 @@ public class MyIntegrationTests {
         response = given()
                 .contentType(ContentType.JSON)
                 .body(testUtils.getRightLogin())
-                .when().post(Constants.urlLoginPath)
+                .when().post(testUtils.urlLoginPath)
                 .then().extract().response();
 
+        System.out.println(response.getBody().prettyPrint());
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode());
         Assertions.assertInstanceOf(TokenMessage.class, response.as(TokenMessage.class));
         tokenMessage = response.as(TokenMessage.class);
@@ -113,7 +110,7 @@ public class MyIntegrationTests {
                 given()
                         .contentType(ContentType.MULTIPART)
                         .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
-                        .multiPart(new File(testUtils.fileFullPath))
+                        .multiPart(testUtils.getTestFile())
                         .when().post(Constants.urlFilePath)
                         .then().extract().response();
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
@@ -124,7 +121,7 @@ public class MyIntegrationTests {
                 given()
                         .contentType(ContentType.MULTIPART)
                         .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
-                        .multiPart(new File(testUtils.fileFullPath))
+                        .multiPart(testUtils.getTestFile())
                         .when().post(Constants.urlFilePath + "?filename=" + testUtils.fileName)
                         .then().extract().response();
         System.out.println(response.getBody().prettyPrint());
@@ -166,7 +163,6 @@ public class MyIntegrationTests {
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
         Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
-//        TODO ошибка 500 возможно ли воспроизвести
 
     }
 
@@ -199,7 +195,7 @@ public class MyIntegrationTests {
                         .when().get(Constants.urlFilePath + "?filename=6.txt")
                         .then().extract().response();
 
-        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatusCode());
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
         Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
 
         response =
@@ -255,7 +251,7 @@ public class MyIntegrationTests {
                         .when().put(Constants.urlFilePath + "?filename=xxx.txt")
                         .then().extract().response();
 
-        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatusCode());
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
         Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
 
         response =
@@ -263,7 +259,7 @@ public class MyIntegrationTests {
                         .contentType(ContentType.JSON)
                         .body(new FileToRename(testUtils.renameFileName))
                         .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
-                        .when().put(Constants.urlFilePath + "?filename" + testUtils.fileName)
+                        .when().put(Constants.urlFilePath + "?filename=" + testUtils.fileName)
                         .then().extract().response();
 
         System.out.println(response.getBody().prettyPrint());
@@ -284,13 +280,13 @@ public class MyIntegrationTests {
         given()
                 .contentType(ContentType.JSON)
                 .cookie(Constants.authTokenName, "")
-                .when().post(Constants.urlLogoutPath)
+                .when().post(testUtils.urlLogoutPath)
                 .then().statusCode(HttpStatus.UNAUTHORIZED.value());
 
         given()
                 .contentType(ContentType.JSON)
                 .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
-                .when().post(Constants.urlLogoutPath)
+                .when().post(testUtils.urlLogoutPath)
                 .then().statusCode(HttpStatus.OK.value());
     }
 }

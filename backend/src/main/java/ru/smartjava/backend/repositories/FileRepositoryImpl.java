@@ -18,7 +18,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Repository
-@Setter
+//@Setter
+//@RequiredArgsConstructor
 public class FileRepositoryImpl implements FileRepository {
 
     @Value("${cloud-settings.filestorepath}")

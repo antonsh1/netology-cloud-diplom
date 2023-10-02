@@ -8,6 +8,7 @@ import java.io.Serializable;
 @ToString
 @Getter
 @Setter
+@EqualsAndHashCode
 public class FileItem {
 
     String filename;

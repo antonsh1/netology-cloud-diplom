@@ -1,4 +1,4 @@
-package ru.smartjava.backend.handlers;
+package ru.smartjava.backend.security.handlers;
 
 import com.google.gson.Gson;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,7 +16,6 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class CustomAuthenticationFailureHandler
         implements AuthenticationFailureHandler {
-
     private final Gson gson =  new Gson();
     @Override
     public void onAuthenticationFailure(

@@ -1,4 +1,4 @@
-package ru.smartjava.backend.entity;
+package ru.smartjava.backend.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -17,6 +17,9 @@ public class ERole {
     }
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Enumerated(EnumType.STRING)
     @Size(max = 100)
 //    @Column(length = 20, unique = true)

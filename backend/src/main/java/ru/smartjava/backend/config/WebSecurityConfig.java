@@ -3,7 +3,6 @@ package ru.smartjava.backend.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -17,11 +16,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import ru.smartjava.backend.handlers.CustomAuthenticationFailureHandler;
-import ru.smartjava.backend.handlers.CustomAuthenticationSuccessHandler;
-import ru.smartjava.backend.handlers.CustomLogoutHandler;
-import ru.smartjava.backend.security.CorsFilter;
-import ru.smartjava.backend.security.CustomFilter;
+import ru.smartjava.backend.security.handlers.CustomAuthenticationFailureHandler;
+import ru.smartjava.backend.security.handlers.CustomAuthenticationSuccessHandler;
+import ru.smartjava.backend.security.handlers.CustomLogoutHandler;
+import ru.smartjava.backend.security.filters.CorsFilter;
+import ru.smartjava.backend.security.filters.CustomFilter;
 import ru.smartjava.backend.security.TokenSecurityContextRepository;
 
 @Configuration

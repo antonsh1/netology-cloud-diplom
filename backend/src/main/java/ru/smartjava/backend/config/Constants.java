@@ -2,9 +2,26 @@ package ru.smartjava.backend.config;
 
 import org.springframework.http.HttpMethod;
 
+
 public class Constants {
 
+    //Имя для сериализации названия токена
     public final static String authTokenName = "auth-token";
+
+    //Пути для работы контроллера
+    public final static String urlFilePath = "file";
+    public final static String urlListPath = "list";
+
+    //Параметры для фильтра авторизации
+    public final static String loginPattern = "/login";
+    public final static String loginMethod = HttpMethod.POST.name();
+
+    //Параметры для cors фильтра
+    public final static String  allowMethodsList = "GET, POST, PUT, DELETE, OPTIONS";
+    public final static String allowHeadersList = "auth-token, authorization, content-type, xsrf-token";
+    public final static String allowCredentials = Boolean.TRUE.toString();
+
+    //Текстовка сообщений
     public final static String userNotFound = "Пользователь не найден";
     public final static String tokenNotFound = "Токен не найден";
     public final static String fileDeleteError = "Ошибка удаления файла";
@@ -12,20 +29,6 @@ public class Constants {
     public final static String saveFileError = "Ошибка сохранения файла";
     public final static String renameFileError = "Ошибка переименования файла";
     public final static String sourceFileAbsent = "Файл источник остутствует";
-    public final static String loginField = "login";
-    public final static String passwordField = "password";
     public final static String userNotAuthorized = "Пользователь не авторизован";
-    public final static String loginPattern = "/login";
-    public final static String loginMethod = HttpMethod.POST.name();
-    public final static String originAddress = "http://localhost:8080";
-    public final static String allowMethodsList = "GET, POST, PUT, DELETE, OPTIONS";
-    public final static String allowHeadersList = "auth-token, authorization, content-type, xsrf-token";
-    public final static Boolean allowCredentials = true;
-    public final static String urlFilePath = "file";
-    public final static String urlListPath = "list";
-    public final static String urlLoginPath = "login";
-    public final static String urlLogoutPath = "logout";
-
-
 
 }

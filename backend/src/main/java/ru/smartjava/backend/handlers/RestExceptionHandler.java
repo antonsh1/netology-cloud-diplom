@@ -10,14 +10,15 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MultipartException;
 import ru.smartjava.backend.entity.ErrorMessage;
-import ru.smartjava.backend.exceptions.CustomInternalServerError;
+import ru.smartjava.backend.exceptions.CustomBadRequestException;
+import ru.smartjava.backend.exceptions.CustomInternalServerErrorException;
 
 @RestControllerAdvice
 public class RestExceptionHandler {
 
     @ExceptionHandler({
             RuntimeException.class
-            , CustomInternalServerError.class
+            , CustomInternalServerErrorException.class
     })
     public ResponseEntity<?> handleCustomInternalServerError(Exception ex) {
         return ResponseEntity.internalServerError().body(new ErrorMessage(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage()));
@@ -29,6 +30,7 @@ public class RestExceptionHandler {
             , FileSizeLimitExceededException.class
             , HttpMessageConversionException.class
             , MissingRequestValueException.class
+            , CustomBadRequestException.class
     })
     public ResponseEntity<ErrorMessage> handleCustomBadRequestsException(
             Exception ex) {
