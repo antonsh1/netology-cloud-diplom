@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.UniqueElements;
 
 import java.util.Collection;
 
@@ -24,7 +25,6 @@ public class EUser {
     @NotBlank
     @Size(max = 50)
     @Column(unique=true)
-//    @UniqueElements
     String login;
 
     @NotNull
@@ -36,7 +36,6 @@ public class EUser {
     String token;
 
     @ManyToMany(fetch = FetchType.EAGER)
-//            (cascade = CascadeType.ALL)
     private Collection<ERole> roles;
 
 }

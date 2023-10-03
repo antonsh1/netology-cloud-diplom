@@ -29,6 +29,9 @@ public class Constants {
     public final static String saveFileError = "Ошибка сохранения файла";
     public final static String renameFileError = "Ошибка переименования файла";
     public final static String sourceFileAbsent = "Файл источник остутствует";
+    public final static String sourceFileReadError = "Ошибка чтения файла";
     public final static String userNotAuthorized = "Пользователь не авторизован";
+    public final static String storageFolderCreationError = "Невозомжно создать директорию хранения файлов.";
+
 
 }

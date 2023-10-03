@@ -1,28 +1,23 @@
 package ru.smartjava.backend.service;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import ru.smartjava.backend.TestBackendApplication;
-import ru.smartjava.backend.entity.FileItem;
 import ru.smartjava.backend.exceptions.CustomBadRequestException;
-import ru.smartjava.backend.repositories.FileRepository;
+import ru.smartjava.backend.exceptions.CustomInternalServerErrorException;
 import ru.smartjava.backend.repositories.FileRepositoryImpl;
+import ru.smartjava.backend.utils.TestUtils;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -34,39 +29,56 @@ public class FileServiceImplTest {
     FileRepositoryImpl fileRepository;
     @Autowired
     FileServiceImpl fileService;
+    @Autowired
+    private TestUtils testUtils;
+
+
+    @BeforeEach
+    void initFileRepository() {
+        when(fileRepository.getFile(testUtils.rightFileName)).thenReturn(Optional.of(new File(testUtils.rightFileName)));
+        when(fileRepository.getFile(testUtils.wrongFileName)).thenReturn(Optional.empty());
+        when(fileRepository.saveFile(testUtils.rightFileName, testUtils.rightMultipartFile)).thenReturn(Boolean.TRUE);
+        when(fileRepository.saveFile(testUtils.wrongFileName, testUtils.wrongMultipartFile)).thenReturn(Boolean.FALSE);
+        when(fileRepository.getFileAsResource(testUtils.rightFileName)).thenReturn(Optional.of(testUtils.emptyIsr));
+        when(fileRepository.getFileAsResource(testUtils.wrongFileName)).thenReturn(Optional.empty());
+    }
 
     @Test
-    void testFindFile() {
-        when(fileRepository.findFile("rightFile")).thenReturn(Optional.of(new File("rightFile")));
-        when(fileRepository.findFile("wrongFile")).thenReturn(Optional.empty());
-        Assertions.assertThrows(CustomBadRequestException.class, () -> fileService.deleteFile("wrongFile"));
-        Assertions.assertDoesNotThrow(() -> fileService.deleteFile("rightFile"));
+    void testDeleteFile() {
+        when(fileRepository.deleteFile(testUtils.rightFileName)).thenReturn(Boolean.FALSE);
+        Assertions.assertThrows(CustomInternalServerErrorException.class, () -> fileService.deleteFile(testUtils.rightFileName));
+        when(fileRepository.deleteFile(testUtils.rightFileName)).thenReturn(Boolean.TRUE);
+        Assertions.assertThrows(CustomBadRequestException.class, () -> fileService.deleteFile(testUtils.wrongFileName));
+        Assertions.assertDoesNotThrow(() -> fileService.deleteFile(testUtils.rightFileName));
     }
 
     @Test
     void testFileList() {
-        Integer limit = 3;
-        List<File> fileList = new ArrayList<>(List.of(
-                new File("1"),
-                new File("2"),
-                new File("3")
-        ));
-        List<FileItem> fileItems = new ArrayList<>(List.of(
-                new FileItem("1",0),
-                new FileItem("2",0),
-                new FileItem("3",0)
-        ));
-        when(fileRepository.getFileList(limit)).thenReturn(fileList);
-
-        Assertions.assertEquals(limit, fileService.getFileList(limit).size());
-        Assertions.assertEquals(fileItems,fileService.getFileList(limit));
+        when(fileRepository.getFileList(testUtils.fileListLimit)).thenReturn(testUtils.fileList);
+        Assertions.assertEquals(testUtils.fileListLimit, fileService.getFileList(testUtils.fileListLimit).size());
+        Assertions.assertEquals(testUtils.fileItems, fileService.getFileList(testUtils.fileListLimit));
     }
 
     @Test
-    void renameFile() {
-        when(fileRepository.renameFile(new File("any"),new File("any"))).thenReturn(Boolean.FALSE);
-        Assertions.assertThrows(CustomBadRequestException.class, () -> fileService.renameFile("any","any"));
-//        Assertions.assertDoesNotThrow(() -> fileService.deleteFile("rightFile"));
+    void testRenameFile() {
+        Assertions.assertThrows(CustomBadRequestException.class, () -> fileService.renameFile("any", "any"));
+        when(fileRepository.renameFile(testUtils.rightFileName, "any")).thenReturn(Boolean.FALSE);
+        Assertions.assertThrows(CustomInternalServerErrorException.class, () -> fileService.renameFile(testUtils.rightFileName, "any"));
+        when(fileRepository.renameFile(testUtils.rightFileName, "any")).thenReturn(Boolean.TRUE);
+        Assertions.assertDoesNotThrow(() -> fileService.renameFile(testUtils.rightFileName, "any"));
+    }
+
+    @Test
+    void testSaveFile() {
+        Assertions.assertDoesNotThrow(() -> fileService.saveFile(testUtils.rightFileName, testUtils.rightMultipartFile));
+        Assertions.assertThrows(CustomInternalServerErrorException.class, () -> fileService.saveFile(testUtils.wrongFileName, testUtils.wrongMultipartFile));
+    }
+
+    @Test
+    void testDownloadFile() {
+        Assertions.assertThrows(CustomBadRequestException.class, () -> fileService.downloadAsResource(testUtils.wrongFileName));
+        Assertions.assertDoesNotThrow(() -> fileService.downloadAsResource(testUtils.rightFileName));
+        Assertions.assertEquals(testUtils.emptyIsr, fileService.downloadAsResource(testUtils.rightFileName));
     }
 
 }

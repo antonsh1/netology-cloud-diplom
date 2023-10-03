@@ -12,9 +12,9 @@ public interface FileService {
 
     void deleteFile(String fileName);
 
-    Resource loadAsResource(String fileName);
+    Resource downloadAsResource(String fileName);
 
-    void storeFile(MultipartFile file);
+    void saveFile(String fileName, MultipartFile file);
 
     void renameFile(String sourceFileName, String destinationFileName);
 

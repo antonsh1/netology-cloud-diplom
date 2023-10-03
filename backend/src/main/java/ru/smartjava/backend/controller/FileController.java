@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
@@ -38,19 +39,19 @@ public class FileController {
     }
 
     @Secured({"DOWNLOAD"})
-    @GetMapping(Constants.urlFilePath)
+    @GetMapping(value = Constants.urlFilePath, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<Resource> downloadFile(@NotNull @RequestParam String filename) {
         return ResponseEntity
                 .ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"" + StandardCharsets.UTF_8.encode(filename) + "\"")
-                .body(fileService.loadAsResource(filename));
+                .body(fileService.downloadAsResource(filename));
     }
 
     @Secured({"UPLOAD"})
     @PostMapping(Constants.urlFilePath)
     ResponseEntity<Object> uploadFile(@NotNull @RequestParam String filename, @NotNull @RequestParam("file") MultipartFile file) {
-        fileService.storeFile(file);
+        fileService.saveFile(filename, file);
         return ResponseEntity.ok().build();
     }
 

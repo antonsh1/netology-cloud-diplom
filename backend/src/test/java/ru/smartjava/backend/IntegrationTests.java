@@ -10,7 +10,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import ru.smartjava.backend.config.Constants;
-import ru.smartjava.backend.entity.ErrorMessage;
+import ru.smartjava.backend.entity.ResponseMessage;
 import ru.smartjava.backend.entity.FileItem;
 import ru.smartjava.backend.entity.FileToRename;
 import ru.smartjava.backend.entity.TokenMessage;
@@ -22,7 +22,7 @@ import static io.restassured.RestAssured.given;
 @Import(TestBackendApplication.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class MyIntegrationTests {
+public class IntegrationTests {
 
     @LocalServerPort
     private Long port;
@@ -51,14 +51,16 @@ public class MyIntegrationTests {
     @Test
     public void testLogin() {
 
+        //Пустой запрос
         Response response = given()
                 .contentType(ContentType.JSON)
                 .when().post(testUtils.urlLoginPath)
                 .then().extract().response();
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
-        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+        Assertions.assertInstanceOf(ResponseMessage.class, response.as(ResponseMessage.class));
 
+        //Неверные данные авторизации
         response =
                 given()
                         .contentType(ContentType.JSON)
@@ -67,17 +69,18 @@ public class MyIntegrationTests {
                         .extract().response();
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
-        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+        Assertions.assertInstanceOf(ResponseMessage.class, response.as(ResponseMessage.class));
 
+        //Верные данные авторизации
         response = given()
                 .contentType(ContentType.JSON)
                 .body(testUtils.getRightLogin())
                 .when().post(testUtils.urlLoginPath)
                 .then().extract().response();
 
-        System.out.println(response.getBody().prettyPrint());
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode());
         Assertions.assertInstanceOf(TokenMessage.class, response.as(TokenMessage.class));
+        //Запоминаем токен, для авторизации в дальнейших тестах
         tokenMessage = response.as(TokenMessage.class);
 
     }
@@ -86,6 +89,7 @@ public class MyIntegrationTests {
     @Test
     public void testUploadFile() {
 
+        //Неверные данные авторизации
         Response response =
                 given()
                         .contentType(ContentType.MULTIPART)
@@ -94,18 +98,20 @@ public class MyIntegrationTests {
                         .then().extract().response();
 
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode());
-        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+        Assertions.assertInstanceOf(ResponseMessage.class, response.as(ResponseMessage.class));
 
+        //Не все параметры запроса проставлены
         response =
                 given()
                         .contentType(ContentType.MULTIPART)
                         .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
                         .when().post(Constants.urlFilePath)
                         .then().extract().response();
-
+        System.out.println(response.getBody().prettyPrint());
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
-        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+        Assertions.assertInstanceOf(ResponseMessage.class, response.as(ResponseMessage.class));
 
+        //Не все параметры запроса проставлены
         response =
                 given()
                         .contentType(ContentType.MULTIPART)
@@ -113,10 +119,11 @@ public class MyIntegrationTests {
                         .multiPart(testUtils.getTestFile())
                         .when().post(Constants.urlFilePath)
                         .then().extract().response();
+        System.out.println(response.getBody().prettyPrint());
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
-        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+        Assertions.assertInstanceOf(ResponseMessage.class, response.as(ResponseMessage.class));
 
-
+        //Верные параметры запроса
         response =
                 given()
                         .contentType(ContentType.MULTIPART)
@@ -124,7 +131,7 @@ public class MyIntegrationTests {
                         .multiPart(testUtils.getTestFile())
                         .when().post(Constants.urlFilePath + "?filename=" + testUtils.fileName)
                         .then().extract().response();
-        System.out.println(response.getBody().prettyPrint());
+
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode());
         Assertions.assertEquals("", response.getBody().print());
 
@@ -134,17 +141,8 @@ public class MyIntegrationTests {
     @Test
     public void testList() {
 
+        //Неверные данные авторизации
         Response response =
-                given()
-                        .contentType(ContentType.JSON)
-                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
-                        .when().get(Constants.urlListPath + "?limit=3")
-                        .then().extract().response();
-
-        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode());
-        Assertions.assertInstanceOf(FileItem[].class, response.as(FileItem[].class));
-
-        response =
                 given()
                         .contentType(ContentType.JSON)
                         .cookie(Constants.authTokenName, "")
@@ -152,8 +150,9 @@ public class MyIntegrationTests {
                         .then().extract().response();
 
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode());
-        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+        Assertions.assertInstanceOf(ResponseMessage.class, response.as(ResponseMessage.class));
 
+        //Не все параметры запроса проставлены
         response =
                 given()
                         .contentType(ContentType.JSON)
@@ -162,14 +161,25 @@ public class MyIntegrationTests {
                         .extract().response();
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
-        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+        Assertions.assertInstanceOf(ResponseMessage.class, response.as(ResponseMessage.class));
 
+        //Верные параметры запроса
+        response =
+                given()
+                        .contentType(ContentType.JSON)
+                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                        .when().get(Constants.urlListPath + "?limit=3")
+                        .then().extract().response();
+
+        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode());
+        Assertions.assertInstanceOf(FileItem[].class, response.as(FileItem[].class));
     }
 
     @Order(40)
     @Test
     public void testDownloadFile() {
 
+        //Неверные данные авторизации
         Response response =
                 given()
                         .contentType(ContentType.JSON)
@@ -177,8 +187,9 @@ public class MyIntegrationTests {
                         .when().get(Constants.urlFilePath)
                         .then().extract().response();
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode());
-        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+        Assertions.assertInstanceOf(ResponseMessage.class, response.as(ResponseMessage.class));
 
+        //Не все параметры запроса проставлены
         response =
                 given()
                         .contentType(ContentType.JSON)
@@ -186,8 +197,9 @@ public class MyIntegrationTests {
                         .when().get(Constants.urlFilePath)
                         .then().extract().response();
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
-        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+        Assertions.assertInstanceOf(ResponseMessage.class, response.as(ResponseMessage.class));
 
+        //Такого файла нет
         response =
                 given()
                         .contentType(ContentType.JSON)
@@ -196,8 +208,9 @@ public class MyIntegrationTests {
                         .then().extract().response();
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
-        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+        Assertions.assertInstanceOf(ResponseMessage.class, response.as(ResponseMessage.class));
 
+        //Верные параметры запроса
         response =
                 given()
                         .contentType(ContentType.JSON)
@@ -206,13 +219,14 @@ public class MyIntegrationTests {
                         .then().extract().response();
 
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode());
-//        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+
     }
 
     @Order(50)
     @Test
     public void testRenameFile() {
 
+        //Неверные данные авторизации
         Response response =
                 given()
                         .contentType(ContentType.JSON)
@@ -221,8 +235,9 @@ public class MyIntegrationTests {
                         .then().extract().response();
 
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode());
-        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+        Assertions.assertInstanceOf(ResponseMessage.class, response.as(ResponseMessage.class));
 
+        //Не все параметры запроса проставлены
         response =
                 given()
                         .contentType(ContentType.JSON)
@@ -231,8 +246,9 @@ public class MyIntegrationTests {
                         .then().extract().response();
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
-        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+        Assertions.assertInstanceOf(ResponseMessage.class, response.as(ResponseMessage.class));
 
+        //Не все параметры запроса проставлены
         response =
                 given()
                         .contentType(ContentType.JSON)
@@ -241,8 +257,9 @@ public class MyIntegrationTests {
                         .then().extract().response();
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
-        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+        Assertions.assertInstanceOf(ResponseMessage.class, response.as(ResponseMessage.class));
 
+        //Такого файла нет
         response =
                 given()
                         .contentType(ContentType.JSON)
@@ -252,8 +269,9 @@ public class MyIntegrationTests {
                         .then().extract().response();
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
-        Assertions.assertInstanceOf(ErrorMessage.class, response.as(ErrorMessage.class));
+        Assertions.assertInstanceOf(ResponseMessage.class, response.as(ResponseMessage.class));
 
+        //Верные параметры запроса
         response =
                 given()
                         .contentType(ContentType.JSON)
@@ -262,27 +280,21 @@ public class MyIntegrationTests {
                         .when().put(Constants.urlFilePath + "?filename=" + testUtils.fileName)
                         .then().extract().response();
 
-        System.out.println(response.getBody().prettyPrint());
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode());
-
-        given()
-                .contentType(ContentType.JSON)
-                .body(new FileToRename(testUtils.fileName))
-                .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
-                .when().put(Constants.urlFilePath + "?filename=" + testUtils.renameFileName);
-
     }
 
     @Order(60)
     @Test
     public void testLogout() {
 
+        //Неверные данные авторизации
         given()
                 .contentType(ContentType.JSON)
                 .cookie(Constants.authTokenName, "")
                 .when().post(testUtils.urlLogoutPath)
                 .then().statusCode(HttpStatus.UNAUTHORIZED.value());
 
+        //Верный токен
         given()
                 .contentType(ContentType.JSON)
                 .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())

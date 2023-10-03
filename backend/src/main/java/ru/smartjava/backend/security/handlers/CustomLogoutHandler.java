@@ -24,12 +24,11 @@ public class CustomLogoutHandler implements LogoutHandler {
                        Authentication authentication) {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         if (authentication != null) {
-            EUser eUser = eUserRepository.findByLogin(authentication.getName()).orElseThrow(
-                    () -> new UsernameNotFoundException(Constants.userNotFound)
-            );
+            EUser eUser = eUserRepository
+                    .findByLogin(authentication.getName())
+                    .orElseThrow(() -> new UsernameNotFoundException(Constants.userNotFound));
             eUserRepository.clearTokenForUserById(eUser.getId());
             response.setStatus(HttpServletResponse.SC_OK);
-
         }
         response.getOutputStream().flush();
     }

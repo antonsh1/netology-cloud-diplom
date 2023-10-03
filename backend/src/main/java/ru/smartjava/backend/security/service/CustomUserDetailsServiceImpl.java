@@ -12,7 +12,9 @@ import ru.smartjava.backend.model.ERole;
 import ru.smartjava.backend.model.EUser;
 import ru.smartjava.backend.repositories.EUserRepository;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,8 +25,11 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
-        EUser user = userRepository.findByLogin(login).orElseThrow(() ->
-                new AuthenticationServiceException(String.format("%s %s", Constants.userNotFound ,login)));
+        EUser user = userRepository
+                .findByLogin(login)
+                .orElseThrow(() ->
+                        new AuthenticationServiceException(String.format("%s %s", Constants.userNotFound, login))
+                );
         user.setToken(UUID.randomUUID().toString());
         userRepository.save(user);
         return new org.springframework.security.core.userdetails.User(
@@ -35,9 +40,11 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
 
     @Override
     public UserDetails loadUserByToken(String token) throws UsernameNotFoundException {
-        EUser user = userRepository.findByToken(token).orElseThrow(() ->
-                new AuthenticationServiceException(String.format("%s %s", Constants.tokenNotFound,token))
-        );
+        EUser user = userRepository
+                .findByToken(token)
+                .orElseThrow(() ->
+                        new AuthenticationServiceException(String.format("%s %s", Constants.tokenNotFound, token))
+                );
         return new org.springframework.security.core.userdetails.User(
                 user.getLogin(), user.getPassword(), true, true, true,
                 true, getAuthorities(user.getRoles()));

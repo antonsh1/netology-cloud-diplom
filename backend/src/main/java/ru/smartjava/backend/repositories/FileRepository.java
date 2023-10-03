@@ -1,5 +1,6 @@
 package ru.smartjava.backend.repositories;
 
+import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -9,10 +10,10 @@ import java.util.Optional;
 public interface FileRepository {
 
     List<File> getFileList(Integer limit);
-    Optional<File> findFile(String file);
-    Boolean deleteFile(File file);
     Optional<File> getFile(String fileName);
-    Boolean saveFile(MultipartFile file);
-    Boolean renameFile(File sourceFile, File destinationFile);
+    Optional<Resource> getFileAsResource(String fileName);
+    Boolean deleteFile(String fileName);
+    Boolean saveFile(String fileName,   MultipartFile file);
+    Boolean renameFile(String sourceFileName, String destinationFileName);
 
 }

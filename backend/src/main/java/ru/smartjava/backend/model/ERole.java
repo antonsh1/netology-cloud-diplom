@@ -8,21 +8,12 @@ import lombok.Getter;
 @Entity
 public class ERole {
 
-    private enum EnumRole {
-        UPLOAD,
-        DOWNLOAD,
-        RENAME,
-        DELETE
-
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Enumerated(EnumType.STRING)
     @Size(max = 100)
-//    @Column(length = 20, unique = true)
     private EnumRole name;
 
     public String getName() {

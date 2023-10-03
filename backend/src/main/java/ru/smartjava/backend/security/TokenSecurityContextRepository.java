@@ -26,13 +26,15 @@ public class TokenSecurityContextRepository implements SecurityContextRepository
     @Override
     public SecurityContext loadContext(HttpRequestResponseHolder requestResponseHolder) {
         HttpServletRequest request = requestResponseHolder.getRequest();
-//        SecurityContext context = SecurityContextHolder.getContext();
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
             return context;
         }
-        Optional<String> token = Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(Constants.authTokenName)).map(Cookie::getValue).findAny();
+        Optional<String> token = Arrays.stream(cookies)
+                .filter(cookie -> cookie.getName().equals(Constants.authTokenName))
+                .map(Cookie::getValue)
+                .findAny();
         if (token.isEmpty()) {
             return context;
         }
@@ -56,14 +58,14 @@ public class TokenSecurityContextRepository implements SecurityContextRepository
     @Override
     public boolean containsContext(HttpServletRequest request) {
         String token = null;
-        Cookie[] allCookie = request.getCookies();
-        if (allCookie != null) {
-            if (allCookie.length > 0) {
-                Optional<Cookie> tmpToken =
-                        Arrays.stream(allCookie).filter(cookie -> cookie.getName().equals(Constants.authTokenName)).findAny();
-                if (tmpToken.isPresent()) {
-                    token = tmpToken.get().getValue();
-                }
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            Optional<String> optionalToken = Arrays.stream(cookies)
+                    .filter(cookie -> cookie.getName().equals(Constants.authTokenName))
+                    .map(Cookie::getValue)
+                    .findAny();
+            if (optionalToken.isPresent()) {
+                token = optionalToken.get();
             }
         }
         return token != null;

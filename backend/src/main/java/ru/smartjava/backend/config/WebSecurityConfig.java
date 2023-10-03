@@ -41,13 +41,14 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, TokenSecurityContextRepository tokenSecurityContextRepository) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, TokenSecurityContextRepository tokenSecurityContextRepository) throws Exception {
 
         CustomFilter customFilter = new CustomFilter();
         customFilter.setAuthenticationSuccessHandler(customSuccessHandler);
         customFilter.setAuthenticationFailureHandler(customFailureHandler);
         customFilter.setAuthenticationManager(authManagerBuilder.getOrBuild());
-        http
+
+        httpSecurity
                 .exceptionHandling(handler -> handler.authenticationEntryPoint(authenticationEntryPoint))
                 .exceptionHandling(httpSecurityExceptionHandlingConfigurer ->
                         new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
@@ -56,11 +57,10 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(corsFilter, ChannelProcessingFilter.class)
                 .addFilterAt(customFilter, UsernamePasswordAuthenticationFilter.class)
-                .authorizeHttpRequests((authorize) -> authorize
-                        .anyRequest().authenticated()
-                )
+                .authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(logout -> logout.addLogoutHandler(customLogoutHandler));
-        return http.build();
+
+        return httpSecurity.build();
     }
 }

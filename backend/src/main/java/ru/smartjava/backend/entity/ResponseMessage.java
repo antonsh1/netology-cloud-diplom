@@ -2,11 +2,10 @@ package ru.smartjava.backend.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.ToString;
 
 @AllArgsConstructor
 @Getter
-public class ErrorMessage {
+public class ResponseMessage {
 
     Integer id;
     String message;

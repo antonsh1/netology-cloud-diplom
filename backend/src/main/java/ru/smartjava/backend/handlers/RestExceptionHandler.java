@@ -9,7 +9,7 @@ import org.springframework.web.bind.MissingRequestValueException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MultipartException;
-import ru.smartjava.backend.entity.ErrorMessage;
+import ru.smartjava.backend.entity.ResponseMessage;
 import ru.smartjava.backend.exceptions.CustomBadRequestException;
 import ru.smartjava.backend.exceptions.CustomInternalServerErrorException;
 
@@ -17,24 +17,24 @@ import ru.smartjava.backend.exceptions.CustomInternalServerErrorException;
 public class RestExceptionHandler {
 
     @ExceptionHandler({
-            RuntimeException.class
-            , CustomInternalServerErrorException.class
+//            RuntimeException.class,
+            CustomInternalServerErrorException.class
     })
     public ResponseEntity<?> handleCustomInternalServerError(Exception ex) {
-        return ResponseEntity.internalServerError().body(new ErrorMessage(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage()));
+        return ResponseEntity.internalServerError().body(new ResponseMessage(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage()));
     }
 
     @ExceptionHandler({
-            MultipartException.class
-            , MethodArgumentNotValidException.class
-            , FileSizeLimitExceededException.class
-            , HttpMessageConversionException.class
-            , MissingRequestValueException.class
-            , CustomBadRequestException.class
+            MultipartException.class,
+            MethodArgumentNotValidException.class,
+            FileSizeLimitExceededException.class,
+            HttpMessageConversionException.class,
+            MissingRequestValueException.class,
+            CustomBadRequestException.class
     })
-    public ResponseEntity<ErrorMessage> handleCustomBadRequestsException(
+    public ResponseEntity<ResponseMessage> handleCustomBadRequestsException(
             Exception ex) {
-        return ResponseEntity.badRequest().body(new ErrorMessage(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage()));
+        return ResponseEntity.badRequest().body(new ResponseMessage(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage()));
     }
 
 }
