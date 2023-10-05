@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Repository
 public class FileRepositoryImpl implements FileRepository {
 
-    @Value("${cloud-settings.filestorepath}")
+    @Value("${cloud-settings.file-store-path}")
     private String fileStorePath;
 
     public List<File> getFileList(Integer limit) {

@@ -22,16 +22,16 @@ public class Constants {
     public final static String allowCredentials = Boolean.TRUE.toString();
 
     //Текстовка сообщений
+    public final static String tokenExpired = "Токен истек";
     public final static String userNotFound = "Пользователь не найден";
-    public final static String tokenNotFound = "Токен не найден";
     public final static String fileDeleteError = "Ошибка удаления файла";
     public final static String fileNotFound = "Файл не найден";
     public final static String saveFileError = "Ошибка сохранения файла";
     public final static String renameFileError = "Ошибка переименования файла";
-    public final static String sourceFileAbsent = "Файл источник остутствует";
+    public final static String sourceFileAbsent = "Файл источник отсутствует";
     public final static String sourceFileReadError = "Ошибка чтения файла";
     public final static String userNotAuthorized = "Пользователь не авторизован";
-    public final static String storageFolderCreationError = "Невозомжно создать директорию хранения файлов.";
+    public final static String storageFolderCreationError = "Невозможно создать директорию хранения файлов.";
 
 
 }

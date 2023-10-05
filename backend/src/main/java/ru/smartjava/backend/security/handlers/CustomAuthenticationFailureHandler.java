@@ -25,14 +25,12 @@ public class CustomAuthenticationFailureHandler
             HttpServletResponse response,
             AuthenticationException exception)
             throws IOException {
-//        response.setContentType("application/json");
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         ResponseMessage responseMessage = new ResponseMessage(HttpServletResponse.SC_BAD_REQUEST,  Constants.userNotAuthorized);
         response.getWriter().println(gson.toJson(responseMessage));
         response.getWriter().flush();
-
     }
 }
 

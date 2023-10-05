@@ -17,7 +17,6 @@ import ru.smartjava.backend.exceptions.CustomInternalServerErrorException;
 public class RestExceptionHandler {
 
     @ExceptionHandler({
-//            RuntimeException.class,
             CustomInternalServerErrorException.class
     })
     public ResponseEntity<?> handleCustomInternalServerError(Exception ex) {

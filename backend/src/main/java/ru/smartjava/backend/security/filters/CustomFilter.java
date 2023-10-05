@@ -14,6 +14,7 @@ import ru.smartjava.backend.entity.LoginEntity;
 
 import java.io.IOException;
 
+
 public class CustomFilter extends AbstractAuthenticationProcessingFilter {
 
     public CustomFilter() {
@@ -30,6 +31,7 @@ public class CustomFilter extends AbstractAuthenticationProcessingFilter {
         } catch (IOException e) {
             throw new AuthenticationServiceException(e.getMessage(), e);
         }
+
 
         UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(loginEntity.getLogin(), loginEntity.getPassword());
 

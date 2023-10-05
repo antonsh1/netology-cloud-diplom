@@ -78,6 +78,7 @@ public class IntegrationTests {
                 .when().post(testUtils.urlLoginPath)
                 .then().extract().response();
 
+        System.out.println(response.getBody().prettyPrint());
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusCode());
         Assertions.assertInstanceOf(TokenMessage.class, response.as(TokenMessage.class));
         //Запоминаем токен, для авторизации в дальнейших тестах
@@ -104,7 +105,7 @@ public class IntegrationTests {
         response =
                 given()
                         .contentType(ContentType.MULTIPART)
-                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                        .cookie(Constants.authTokenName, tokenMessage.getAuthToken())
                         .when().post(Constants.urlFilePath)
                         .then().extract().response();
         System.out.println(response.getBody().prettyPrint());
@@ -115,7 +116,7 @@ public class IntegrationTests {
         response =
                 given()
                         .contentType(ContentType.MULTIPART)
-                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                        .cookie(Constants.authTokenName, tokenMessage.getAuthToken())
                         .multiPart(testUtils.getTestFile())
                         .when().post(Constants.urlFilePath)
                         .then().extract().response();
@@ -127,7 +128,7 @@ public class IntegrationTests {
         response =
                 given()
                         .contentType(ContentType.MULTIPART)
-                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                        .cookie(Constants.authTokenName, tokenMessage.getAuthToken())
                         .multiPart(testUtils.getTestFile())
                         .when().post(Constants.urlFilePath + "?filename=" + testUtils.fileName)
                         .then().extract().response();
@@ -156,7 +157,7 @@ public class IntegrationTests {
         response =
                 given()
                         .contentType(ContentType.JSON)
-                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                        .cookie(Constants.authTokenName, tokenMessage.getAuthToken())
                         .when().get(Constants.urlFilePath).then()
                         .extract().response();
 
@@ -167,7 +168,7 @@ public class IntegrationTests {
         response =
                 given()
                         .contentType(ContentType.JSON)
-                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                        .cookie(Constants.authTokenName, tokenMessage.getAuthToken())
                         .when().get(Constants.urlListPath + "?limit=3")
                         .then().extract().response();
 
@@ -193,7 +194,7 @@ public class IntegrationTests {
         response =
                 given()
                         .contentType(ContentType.JSON)
-                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                        .cookie(Constants.authTokenName, tokenMessage.getAuthToken())
                         .when().get(Constants.urlFilePath)
                         .then().extract().response();
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode());
@@ -203,7 +204,7 @@ public class IntegrationTests {
         response =
                 given()
                         .contentType(ContentType.JSON)
-                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                        .cookie(Constants.authTokenName, tokenMessage.getAuthToken())
                         .when().get(Constants.urlFilePath + "?filename=6.txt")
                         .then().extract().response();
 
@@ -214,7 +215,7 @@ public class IntegrationTests {
         response =
                 given()
                         .contentType(ContentType.JSON)
-                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                        .cookie(Constants.authTokenName, tokenMessage.getAuthToken())
                         .when().get(Constants.urlFilePath + "?filename=" + testUtils.fileName)
                         .then().extract().response();
 
@@ -241,7 +242,7 @@ public class IntegrationTests {
         response =
                 given()
                         .contentType(ContentType.JSON)
-                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                        .cookie(Constants.authTokenName, tokenMessage.getAuthToken())
                         .when().put(Constants.urlFilePath)
                         .then().extract().response();
 
@@ -252,7 +253,7 @@ public class IntegrationTests {
         response =
                 given()
                         .contentType(ContentType.JSON)
-                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                        .cookie(Constants.authTokenName, tokenMessage.getAuthToken())
                         .when().put(Constants.urlFilePath + "?filename=" + testUtils.fileName)
                         .then().extract().response();
 
@@ -264,7 +265,7 @@ public class IntegrationTests {
                 given()
                         .contentType(ContentType.JSON)
                         .body(new FileToRename(testUtils.renameFileName))
-                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                        .cookie(Constants.authTokenName, tokenMessage.getAuthToken())
                         .when().put(Constants.urlFilePath + "?filename=xxx.txt")
                         .then().extract().response();
 
@@ -276,7 +277,7 @@ public class IntegrationTests {
                 given()
                         .contentType(ContentType.JSON)
                         .body(new FileToRename(testUtils.renameFileName))
-                        .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                        .cookie(Constants.authTokenName, tokenMessage.getAuthToken())
                         .when().put(Constants.urlFilePath + "?filename=" + testUtils.fileName)
                         .then().extract().response();
 
@@ -297,7 +298,7 @@ public class IntegrationTests {
         //Верный токен
         given()
                 .contentType(ContentType.JSON)
-                .cookie(Constants.authTokenName, tokenMessage.getAuthtoken())
+                .cookie(Constants.authTokenName, tokenMessage.getAuthToken())
                 .when().post(testUtils.urlLogoutPath)
                 .then().statusCode(HttpStatus.OK.value());
     }
