@@ -15,7 +15,7 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Component;
 import ru.smartjava.backend.config.Constants;
 import ru.smartjava.backend.security.service.CustomUserDetailsService;
-import ru.smartjava.backend.service.JwtTokenUtil;
+import ru.smartjava.backend.utils.JwtTokenUtil;
 
 import java.util.Arrays;
 import java.util.Optional;

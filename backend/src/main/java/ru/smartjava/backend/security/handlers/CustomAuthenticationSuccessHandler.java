@@ -9,7 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Service;
 import ru.smartjava.backend.entity.TokenMessage;
-import ru.smartjava.backend.service.JwtTokenUtil;
+import ru.smartjava.backend.utils.JwtTokenUtil;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
